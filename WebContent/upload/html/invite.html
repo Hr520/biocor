@@ -1,0 +1,163 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>邀请好友</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/jquery.min.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+    		getQcode();
+    	});
+    	function getQcode(){
+    		var userid = getUrlParam("userid");
+    		$.ajax({
+    			type : "POST",
+    			url : "/interface/userInfo/recommendFriends",
+    			data : {userid:userid},
+    			dataType :　"json",
+    			success : function(data){
+    				$("#user_qcode").attr('src',"images/shanmei.jpg");
+    				$("#referee_phone").val(data.data['user_code']);
+    			}
+    		});
+    	}
+    	/**
+    	截取url中的参数
+    	*/
+    	function getUrlParam(name)
+    	{
+    	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+    	var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+    	if (r!=null) return unescape(r[2]); return null; //返回参数值
+    	}
+    </script>
+</head>
+<body style="background:#f5f5f5;">
+    <img src="images/head_bg.png" class="all-img">
+    <div class="wrap">
+        <ul class="invite-ul clearfix">
+            <li><img src="images/invite-pic.png" class="all-img"></li>
+            <li><img src="images/invite-pic1.png" class="all-img"></li>
+        </ul>
+            <div class="mobile-box">
+
+                <div class="div-box">
+                    <label class="input-label"></label>
+                    <div class="input-box">
+                        <input type="tel"  class="input-text" placeholder="请输入手机号" id="mobile" name="user_code">
+                    </div>
+                </div>
+                <div class="div-box" id="div-box">
+                    <label class="input-label icon"></label>
+                    <div class="input-box1">
+                        <input type="tel"  class="input-text" placeholder="请输入验证码" id="yzm" name="verify_code">
+                    </div>
+                    <div class="input-right" id="send">获取验证码</div>
+                </div>
+                <input type="button" class="r-btn" value="注册山莓，立即体验吧" onclick="check()">
+                <input id="referee_phone" name="referee_phone" type="hidden">
+            </div>
+        <!-- </form> -->
+        <section class="s1 mb20">
+            <div class="wrap">
+                <div class="invite-app">山莓，一款吃饭消费、获得奖励的APP</div>
+                <div class="inv-footer clearfix"  style="">
+                    <img src="" class="ewm-img" id="user_qcode">
+                    <div class="inv-add">好友可以扫描<br>二维码加入山莓</div>
+                </div>
+            </div>
+        </section>
+    </div>
+<script>
+	var status = 0;
+    function check() {
+        var mobile = $("#mobile").val();
+        var yzm =  $("#yzm").val();
+        var referee_phone = $("#referee_phone").val();
+        var reg = /^1[34578]\d{9}$/;
+        if (mobile == '') {
+            alert("请输入手机号码！");
+            return;
+        } else if (!reg.test(mobile)) {
+            alert("请输入正确的手机号码！");
+            return;
+        }
+		if(yzm == ""){
+            alert("请输入验证码");
+            return;
+        }
+        $.ajax({
+			type : "POST",
+			url : "/interface/login/registerUserInviteH5",
+			data : {user_code:mobile,verify_code:yzm,referee_phone:referee_phone},
+			dataType :　"json",
+			success : function(data){
+				if(data.state=="1"){
+					alert(data.msg);
+				}else if (data.state=="2") {
+					alert("系统错误");
+				}else{
+					alert("注册成功");
+					$("#yzm").val("");
+				}
+			}
+		});
+    }
+    $("input[type=tel]").focus(function(){
+       $("#div-box").show();
+    });
+    $(function(){
+        $("input[type=tel]").change(function(){
+            var mobile = $("#mobile").val();
+            var reg = /^1[34578]\d{9}$/;
+            if (mobile == '') {
+                alert("请输入手机号码！");
+            } else if (!reg.test(mobile)) {
+                alert("请输入正确的手机号码！");
+            }else {
+                $("#div-box").show();
+            }
+        });
+		//发送验证码
+        $('.mobile-box').on('click', '.input-right' , function(){
+        	if(status == 0) {
+	        	var user_code = $("#mobile").val();
+	    		$.ajax({
+	    			type : "POST",
+	    			url : "/interface/login/sendSmsInviteH5",
+	    			data : {user_code:user_code},
+	    			dataType :　"json",
+	    			async: false,
+	    			success : function(data){
+	    				if(data.state=="1"){
+	    					alert(data.msg);
+	    				}else if (data.state=="2") {
+	    					alert("系统错误");
+						}else{
+				            smss();
+						}
+	    			}
+	    		});
+        	}
+        });
+    });
+    function smss(){
+    	status = 1;
+        var count = 59;
+        $("#send").text(count + '秒');
+        var id = setInterval(function () {
+            count--;
+            $("#send").text(count + '秒');
+            if (count <= 0) {
+            	$("#send").text('获取验证码');
+                clearInterval(id);
+                status = 0;
+            }
+        }, 1000);
+    }
+</script>
+</body>
+</html>

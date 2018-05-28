@@ -1,0 +1,85 @@
+*{
+    margin:0;
+    padding:0;
+}
+body{
+    font:14px/1.5 "Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+    color:#333;
+}
+a{
+    text-decoration: none;
+    color:#333;
+}
+a img{
+    border:none;
+}
+ul,li{
+    list-style-type: none;
+}
+img{display: block;font-size: 0}
+em{
+    font-style:normal;
+}
+/*input::-ms-input-placeholder{text-align: center;}
+input::-webkit-input-placeholder{text-align: center;}*/
+input[type="button"], input[type="submit"], input[type="reset"] {
+    -webkit-appearance: none;
+}
+textarea {  -webkit-appearance: none;}
+
+.clearfix:after{
+    display:block;
+    clear:both;
+    content:"";
+    visibility:hidden;
+    height:0
+}
+.clearfix{
+    zoom:1
+}
+.fl{
+    float:left;
+}
+.fr{
+    float:right !important;
+}
+.fn{
+    float:none;
+}
+.tl{
+    text-align: left !important;
+}
+.tc{
+    text-align: center;
+}
+.rel{
+    position:relative;
+}
+.all-img{
+    width:100%;
+}
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+/*-------------------*/
+.wrap{
+    padding: 5px 10px 15px;
+}
+.s1 p{
+    text-indent: 25px;
+    font-weight: 600;
+}
+.tit-div{
+    height:30px;
+    line-height:30px;
+    font-size:14px;
+    font-weight: 600;
+}
+.list-ul div{
+    color:#333;
+    font-weight: 600;
+    padding:3px 0;
+}
+.list-ul li{
+    text-indent: 25px;
+}

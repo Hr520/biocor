@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="appuserMapper">
+
+    <!-- 查询用户列表 -->
+	<select id="findAppUserlistPage" parameterType="pd" resultType="pd" useCache="false">
+		select a.userid,a.user_code,a.user_qq,a.user_wx,a.user_wb,a.user_pwd,
+		    a.verifycode,a.user_name,a.user_img,a.user_sex,a.user_birthday,
+		    a.user_t_area,a.user_pay_pwd,a.user_last_logindate,a.user_min_freepay,
+		    a.remark,a.user_qcode,a.user_money,a.user_invite_code,a.user_integral,
+		    a.user_createdate,a.user_grade_integral,ifnull(a.user_addres,'') as user_addres
+		from zs_bk_user_info a
+		where 1=1
+		<if test="pd.phone != null">
+		    and a.user_code like '%${pd.phone}%'
+		</if>    
+		order by a.user_last_logindate desc
+		
+	</select>
+<!-- 根据用户id查询到店铺id -->
+		<select id="getSHop_id" parameterType="pd" resultType="java.lang.String">
+		SELECT b.sid FROM sys_user AS a 
+		LEFT JOIN zs_bk_shop_info AS b
+           ON a.USER_ID=b.user_id 
+        where  b.USER_ID=#{userid}
+		</select>
+<!-- 查询店铺下面所有的店员 -->
+<select id="getShoAllUser" parameterType="pd" resultType="pd">
+	SELECT
+     a.id,
+     a.login_name,
+     a.phone,
+	 a.sex,
+     a.age,
+     a.state,
+     a.createTime
+     FROM
+     zs_bk_shop_assistant AS a
+     WHERE
+	  a.shop_id =#{shop_id} and a.state=1
+</select>
+<!-- 新增店员 -->
+<insert id="addShopUser" parameterType="pd">
+	insert into zs_bk_shop_assistant(id,shop_id,login_name,password,sex,type,phone,age,state,createTime)values(null,#{shop_id},#{login_name},#{password},#{sex},2,#{phone},#{age},1,now())
+</insert>
+<!-- 店铺主删除自己名下的店员 假删除改变店员状态为2已删除 -->
+<update id="deleteUser" parameterType="pd">
+	update zs_bk_shop_assistant set state=2 where id=#{id}
+</update>
+</mapper>

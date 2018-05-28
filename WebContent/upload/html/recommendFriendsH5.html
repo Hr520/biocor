@@ -1,0 +1,102 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>邀请好友</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/jquery.min.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+    		pageFind();
+    	});
+    	function pageFind(){
+    		var userid = getUrlParam("userid");
+    		var user_code = getUrlParam("user_code");
+    		var curpage = $("#curpage").val();
+    		$.ajax({
+    			type : "POST",
+    			url : "/interface/userInfo/recommendFriendsH5",
+    			data : {userid:userid,curpage:curpage,user_code:user_code},
+    			dataType :　"json",
+    			success : function(data){
+    				$("#user_qcode").attr('src',"images/shanmei.jpg");
+    				var listHtml = "";
+    				if(data.list.length>0){
+    					$.each(data.list,function(index,content){
+        					listHtml+="<tr><td class='user-title'><img src='"
+        							+"/"+content['user_img']
+        							+"' ></td><td>"
+        							+content['user_code'].substring(0,3)+"****"+content['user_code'].substring(content['user_code'].length-4)
+        							+"</td><td>"
+        							+content['user_createdate']
+        							+"</td></tr>";
+        				});
+        				$("#content").append(listHtml);
+    				}
+    			}
+    		});
+    	}
+    	/**
+    	截取url中的参数
+    	*/
+    	function getUrlParam(name)
+    	{
+    	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+    	var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+    	if (r!=null) return unescape(r[2]); return null; //返回参数值
+    	}
+    	function more(){
+    		var curpage = parseInt($("#curpage").val());
+    		curpage = curpage + 1;
+    		$("#curpage").val(curpage);
+    		pageFind();
+    	}
+    </script>
+</head>
+<body style="background:#f5f5f5;">
+<img src="images/head_bg.png" class="all-img">
+<div class="wrap">
+    <ul class="invite-ul clearfix">
+        <li><img src="images/invite-pic.png" class="all-img"></li>
+        <li><img src="images/invite-pic1.png" class="all-img"></li>
+    </ul>
+    <section class="s1 mt10">
+        <div class="wrap">
+            <div class="invite-app">山莓，一款吃饭消费、获得奖励的APP</div>
+            <div class="inv-footer clearfix"  style="">
+                <img src="images/ewm.png" class="ewm-img" id="user_qcode">
+                <div class="inv-add">好友可以扫描<br>二维码加入山莓</div>
+            </div>
+        </div>
+    </section>
+</div>
+<section class="s1 mt10 mb60">
+    <div class="wrap">
+        <div class="tg-title">推广记录</div>
+        <input type="hidden" id="curpage" value="1">
+        <table class="table1">
+        <tbody id="content">
+            <tr class="tr1">
+                <td >头像</td>
+                <td>昵称/账号</td>
+                <td>注册时间</td>
+            </tr>
+            
+        </tbody>
+            <tr>
+                <td colspan="3"><a href="javascript:void" onclick="more()">加载更多数据</a></td>
+            </tr>
+        </table>
+    </div>
+</section>
+<!--
+<footer class="footer" style="background:rgba(245,245,245,0.9)">
+    <div class="jl-btn">
+        <a href="#" class="r-btn block">分享此链接地址</a>
+    </div>
+</footer>
+-->
+</body>
+</html>

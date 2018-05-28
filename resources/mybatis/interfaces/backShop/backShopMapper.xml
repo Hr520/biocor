@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="backShopMapper">
+
+
+
+
+	<resultMap type="backGoods" id="goodsResultMap">
+		<id column="gid" property="gid" />
+		<result column="goods_name" property="goods_name" />
+		<result column="goods_moeny" property="goods_moeny" />
+		<result column="goods_dis_money" property="goods_dis_money" />
+		<result column="goods_images" property="goods_images" />
+		<result column="goods_sid" property="goods_sid" />
+		<result column="goods_ISshelves" property="goods_ISshelves" />
+		<result column="goods_taste" property="goods_taste" />
+		<result column="salesCount" property="salesCount" />
+		<result column="jifen" property="jifen" />
+		<!-- <result column="goods_ISrecommend" property="goods_ISrecommend"/> -->
+		<!-- <result column="goods_createdate" property="goods_createdate"/> -->
+		<!-- <result column="goods_remark" property="goods_remark"/> <result column="goods_taste" 
+			property="goods_taste"/> -->
+		<!-- <result column="goods_ISshelves" property="goods_ISshelves"/> <result 
+			column="goods_up_shelves" property="goods_up_shelves"/> <result column="goods_dw_shelves" 
+			property="goods_dw_shelves"/> -->
+	</resultMap>
+
+	<resultMap type="backGoodsType" id="goodstypeResultMap">
+		<id column="ftid" property="ftid" />
+		<result column="ft_foodtype_name" property="ft_foodtype_name" />
+		<!-- <result column="ft_foodtype_createdate" property="ft_foodtype_createdate"/> -->
+		<result column="ft_foodtype_remark" property="ft_foodtype_remark" />
+	</resultMap>
+
+
+
+
+
+
+
+	<!-- //写入用户登录信息 -->
+	<update id="ShopUSerlogin" parameterType="pd">
+		update zs_bk_shop_assistant set login_state=#{login_state} , onlycode=#{onlycode} where
+		id=#{id}
+	</update>
+
+	<!-- 查询用户相关信息用户登录返回相应的数据信息 -->
+	<select id="getUserPwd" parameterType="pd" resultType="pd">
+		SELECT
+		b.id,
+		ifnull(b.onlycode,'')as onlycode,
+		IFNULL(c.shop_name,'') AS shop_name,
+		IFNULL(SUBSTRING(c.shop_images,1,
+		IF(LOCATE(',',c.shop_images)-1=-1,CHAR_LENGTH(c.shop_images),LOCATE(',',c.shop_images)-1)
+		),'') as
+		headImg,
+		IFNULL( b.headImg,'')AS headImg,
+		IFNULL( b.login_name,'')AS login_name,
+		IFNULL(b.password,'')AS password,
+		IFNULL(b.nicke_name,'')AS nicke_name,
+		IFNULL(b.sex,'')AS sex,
+		IFNULL(b.type,'')AS type,
+		IFNULL(b.shop_id,'')AS shop_id,
+		IFNULL(b.login_state,-1)AS login_state,
+		IFNULL(b.onlycode,-1) AS onlycode
+		FROM
+		zs_bk_shop_assistant AS b
+		LEFT JOIN zs_bk_shop_info AS c
+		ON b.shop_id=c.sid
+		WHERE
+		b.login_name =#{login_name}
+		AND b.state = 1
+	</select>
+	<!-- 根据商户的id查询到商户的订单消费情况 -->
+	<select id="getSHOpperINfo" parameterType="pd" resultType="pd">
+		SELECT count(a.oid) AS order_total,IFNULL(sum(a.order_money),0)AS
+		total_moeny FROM zs_bk_order_info AS a WHERE a.order_sid=#{shop_id}
+		AND order_state=2 AND CURDATE()=DATE(a.order_pay_date)
+	</select>
+
+
+	<!-- 商品类型 -->
+	<select id="findgoodsTypeList" resultMap="goodstypeResultMap"
+		parameterType="pd">
+		select DISTINCT y.ftid,y.ft_foodtype_name from
+		zs_bk_goodstype_info y
+		LEFT JOIN zs_bk_goods_info x on (y.ftid
+		=x.goods_gtid )
+		LEFT JOIN
+		zs_bk_shop_info z on (x.goods_sid=z.sid )
+		where z.sid=#{shop_id} and
+		<choose>
+			<when test="type!=null and type!=''">
+				(x.goods_ISshelves=#{type} or x.goods_ISshelves=3)
+			</when>
+			<otherwise>
+				(x.goods_ISshelves=0 or x.goods_ISshelves=2)
+			</otherwise>
+		</choose>
+		ORDER BY y.ftid DESC
+	</select>
+	<!-- 菜品类型goods_gtid=10表示积分换购 -->
+	<select id="findShopGoodsList" parameterType="pd" resultMap="goodsResultMap">
+		SELECT y.ftid,
+		x.gid,
+		x.goods_name,
+		x.goods_moeny,
+		x.goods_dis_money,
+		x.goods_images,
+		x.goods_taste,
+		x.goods_remark,
+		x.goods_sid,
+		x.goods_ISshelves,
+		IF((x.goods_gtid=10),goods_dis_money,0)AS jifen
+		from
+		zs_bk_goods_info x
+		LEFT JOIN zs_bk_goodstype_info y on
+		(x.goods_gtid=y.ftid and
+		<choose>
+			<when test="type!=null and type!=''">
+				(x.goods_ISshelves=#{type} or x.goods_ISshelves=3))
+			</when>
+			<otherwise>
+				(x.goods_ISshelves=0 or x.goods_ISshelves=2))
+			</otherwise>
+		</choose>
+		LEFT JOIN zs_bk_shop_info
+		z on (x.goods_sid=z.sid)
+		where y.ftid=#{ftid}
+		and z.sid=#{shop_id} and
+		<choose>
+			<when test="type!=null and type!=''">
+				(x.goods_ISshelves=#{type} or x.goods_ISshelves=3)
+			</when>
+			<otherwise>
+				(x.goods_ISshelves=0 or x.goods_ISshelves=2)
+			</otherwise>
+		</choose>
+	</select>
+	<!-- 查询店铺下面所有的菜品类型列表 -->
+	<select id="getShopbygoodslist" resultType="pd">
+		SELECT b.ftid,b.ft_foodtype_name FROM zs_bk_goodstype_info AS b GROUP BY
+		b.ftid
+	</select>
+	<!-- 新增菜品 -->
+	<insert id="AddGoods" parameterType="pd">
+		insert into
+		zs_bk_goods_info(gid,goods_name,goods_moeny,goods_dis_money,goods_images,goods_gtid,goods_sid,goods_createdate,goods_remark,goods_taste,goods_ISshelves)
+		values(null,#{goods_name},#{goods_moeny},#{goods_dis_money},#{goods_images},#{t_id},#{shop_id},now(),#{goods_remark},#{goods_taste},0)
+	</insert>
+	<!-- 判定菜品是否为积分菜 -->
+	<select id="getgoodSType" parameterType="pd" resultType="pd">
+		SELECT IFNULL(a.goods_dis_money,0) AS jifen,a.goods_ISshelves as
+		goods_ISshelves FROM zs_bk_goods_info AS a WHERE a.gid=#{gid}
+	</select>
+	<!-- 菜品上架下架售罄状态修改 -->
+	<update id="updateGOODsshelves" parameterType="pd">
+		update zs_bk_goods_info set goods_ISshelves=#{goods_ISshelves} where
+		gid=#{gid}
+	</update>
+	<!-- 修改菜品价格 积分菜修改积分价格 -->
+	<update id="updaGoodsByMoneyintegral" parameterType="pd">
+		update zs_bk_goods_info set gid=#{gid}
+		<if test="goods_dis_money!=null and goods_dis_money!=''">
+			,goods_dis_money=#{goods_dis_money}
+		</if>
+		<if test="goods_moeny!=null and goods_moeny!=''">
+			,goods_moeny=#{goods_moeny}
+		</if>
+		where gid=#{gid}
+	</update>
+	<!-- 修改菜品价格写入菜品修改历史 -->
+	<insert id="insertGoodsMoneyUPdateinfo" parameterType="pd">
+		insert into
+		zs_bk_goodsmoney_updat_info(id,gid,money,goods_dis_money,createTime)values(null,#{gid},#{goods_moeny},#{goods_dis_money},now())
+	</insert>
+	<!-- 查询当前菜品的销售数量 模糊查询中也用到了 -->
+	<select id="getGoodsTotal" parameterType="pd" resultType="java.lang.Integer">
+		SELECT ifnull(SUM(b.od_goodsNum),0) AS goodnum FROM zs_bk_order_info AS a
+		LEFT JOIN zs_bk_order_detail_info AS b
+		ON a.order_no=b.od_oNO
+		WHERE b.od_goodsId=#{gid} AND a.order_state=2
+	</select>
+	<!-- 查询当前店铺下的菜品结果 -->
+	<select id="getsreachGoodslist" parameterType="pd" resultType="pd">
+		SELECT
+		a.gid,a.goods_dis_money,a.goods_moeny,a.goods_name,a.goods_ISshelves,a.goods_gtid,a.goods_taste,r.ft_foodtype_name,
+		ifnull(a.goods_images,'')as goods_images
+		FROM zs_bk_goods_info AS a
+		LEFT JOIN zs_bk_goodstype_info as r on a.goods_gtid=r.ftid
+		WHERE a.goods_name LIKE '%${goods_name}%' AND a.goods_sid=#{shop_id}
+	</select>
+	<!-- // 修改菜品修改菜品为申请上架中状态 -->
+	<update id="GoodsUPdate" parameterType="pd">
+		update zs_bk_goods_info set gid=#{gid}
+		<if test="goods_name!=null and goods_name!=''">
+			, goods_name=#{goods_name}
+		</if>
+		<if test="goods_moeny!=null and goods_moeny!=''">
+			,goods_moeny=#{goods_moeny}
+		</if>
+		<if test="goods_taste!=null and goods_taste!=''">
+			,goods_taste=#{goods_taste}
+		</if>
+		<if test="goods_remark!=null and goods_remark!=''">
+			,goods_remark=#{goods_remark}
+		</if>
+		<if test="goods_images!=null and goods_images!=''">
+			,goods_images=#{goods_images}
+		</if>
+		<if test="goods_dis_money!=null and goods_dis_money!=''">
+			,goods_dis_money=#{goods_dis_money}
+		</if>
+		<if test="goods_ISshelves!=null and goods_ISshelves!=''">
+			,goods_ISshelves=#{goods_ISshelves}
+		</if>
+		<if test="t_id!=null and t_id!=''">
+			,goods_gtid=#{t_id}
+		</if>
+		,goods_createdate=now() where gid=#{gid}
+	</update>
+	<!-- 用户退出 -->
+	<update id="UserexitLogin" parameterType="pd">
+		update zs_bk_shop_assistant set login_state=0 where id=#{id}
+	</update>
+	<!-- 店铺设置 -->
+	<update id="updateShop" parameterType="pd">
+		update zs_bk_shop_info set sid=#{shop_id}
+		<if test="shopAdrees!=null and shopAdrees!=''">
+			,shop_adders=#{shopAdrees}
+		</if>
+		<if test="phone!=null and phone!=''">
+			,shop_tel=#{phone}
+		</if>
+		<if test="shop_name!=null and shop_name!=''">
+			,shop_name=#{shop_name}
+		</if>
+		<if test="business_time!=null and business_time!=''">
+			,shop_time=#{business_time}
+		</if>
+		<if test="Permoney!=null and Permoney!=''">
+			,shop_consume=#{Permoney}
+		</if>
+		where sid=#{shop_id} and shop_ISshelves=0
+	</update>
+	<!-- 修改店铺信息 -->
+	<update id="updatSHopALL" parameterType="pd">
+		update zs_bk_shop_info set sid=#{shop_id}
+		<if test="shopAdrees!=null and shopAdrees!=''">
+			,shop_adders=#{shopAdrees}
+		</if>
+		<if test="phone!=null and phone!=''">
+			,shop_tel=#{phone}
+		</if>
+		<if test="shop_name!=null and shop_name!=''">
+			,shop_name=#{shop_name}
+		</if>
+		<if test="business_time!=null and business_time!=''">
+			,shop_time=#{business_time}
+		</if>
+		<if test="Permoney!=null and Permoney!=''">
+			,shop_consume=#{Permoney}
+		</if>
+		<if test="shop_img!=null and shop_img!=''">
+			,shop_images=#{shop_img}
+		</if>
+		where sid=#{shop_id} 
+	</update>
+	<!-- 按照类型查询订单详情 type=1表示未消费订单，2表示已消费的订单，3表示查询失效订单包括取消订单申请中和已审核通过的取消订单 -->
+	<select id="getOrderBytypelistpage" parameterType="pd"
+		resultType="pd">
+		SELECT
+		a.order_no,
+		b.user_name,
+		b.user_code,
+		IFNULL(c.ub_bespeakdate, a.order_pay_date) AS ub_bespeakdate,
+		a.order_type,
+		a.order_state,
+		IFNULL(c.ub_dinersNum, 0) AS ub_dinersNum,
+		f.shop_name,
+		SUBSTRING(f.shop_images,1,
+		IF(LOCATE(',',f.shop_images)-1=-1,CHAR_LENGTH(f.shop_images),LOCATE(',',f.shop_images)-1)
+		) as shop_images
+		FROM
+		zs_bk_order_info AS a
+		LEFT JOIN zs_bk_user_info AS b ON a.order_userId = b.userid
+		LEFT JOIN zs_bk_user_bespeak_info AS c ON a.order_no = c.ub_order_no
+		AND a.order_type = 0
+		LEFT JOIN zs_bk_shop_info AS f ON f.sid = a.order_sid
+		LEFT JOIN zs_bk_cancel_order as r on a.order_no=r.order_no
+		WHERE
+		a.order_sid =#{shop_id}
+		<if test="type==1">
+			AND a.order_state=1
+			GROUP BY a.order_no
+			ORDER BY ub_bespeakdate
+		</if>
+		<if test="type==2">
+			AND a.order_state=2
+			GROUP BY a.order_no
+		 ORDER BY a.order_commit_time desc
+		</if>
+		<if test="type==3">
+			AND (a.order_state=4 or a.order_state=5)
+			GROUP BY a.order_no
+			ORDER BY r.cancel_time
+		</if>
+		limit #{stratrows},#{rows}
+	</select>
+	<!-- 查询订单总数 -->
+	<select id="getShopOrderCount" parameterType="pd" resultType="pd">
+		SELECT count(a.order_no) AS order_total,1 AS type
+		FROM zs_bk_order_info AS a
+ left join zs_bk_user_bespeak_info as b
+    on a.order_no=b.ub_order_no
+		WHERE
+		a.order_sid=#{shop_id} and (a.order_state=2 or a.order_state=1 ) AND DATE(a.order_pay_date)=CURDATE() and DATE(ub_bespeakdate)=CURDATE()
+		UNION
+		SELECT count(a.order_no) AS order_total,2
+		FROM zs_bk_order_info AS a
+ left join zs_bk_user_bespeak_info as b
+    on a.order_no=b.ub_order_no
+		WHERE
+		a.order_sid=#{shop_id} and (a.order_state=2 or a.order_state=1 )  AND  a.order_type=0 AND DATE(b.ub_bespeakdate)=CURDATE()
+    union
+		SELECT count(a.order_no) AS order_total,3
+		FROM zs_bk_order_info AS a
+    left join zs_bk_user_bespeak_info as b
+    on a.order_no=b.ub_order_no
+		WHERE
+		a.order_sid=#{shop_id} and   a.order_state=1 AND a.order_type=0 AND DATE(ub_bespeakdate)=CURDATE()+1
+	</select>
+	<!-- 判断该用户是否是店主 -->
+	<select id="getShopUserisnoleder" parameterType="pd"
+		resultType="java.lang.Integer">
+		SELECT count(id) AS count FROM zs_bk_shop_assistant AS a
+		WHERE a.shop_id=#{shop_id} AND a.type=1 AND a.id=#{userid}
+	</select>
+
+	<!-- 根据店铺id查询到店铺的图片 -->
+	<select id="getShopImgs" parameterType="pd" resultType="java.lang.String">
+		SELECT a.shop_images FROM zs_bk_shop_info AS a
+		WHERE a.sid=#{shop_id}
+	</select>
+
+	<!-- 修改店铺图片操作 -->
+	<update id="updateShopimg" parameterType="pd">
+		UPDATE zs_bk_shop_info AS a SET a.shop_images=#{shop_img} WHERE
+		a.sid=#{shop_id}
+	</update>
+
+	<!-- 查询当前店铺下面的评价列表 -->
+	<select id="getShopevaluationList" parameterType="pd"
+		resultType="pd">
+		SELECT
+		a.seid,
+		a.se_grade,
+		a.se_evaluate_date,
+		IFNULL(b.userid,'')as userid,
+		IFNULL(b.user_img,'')AS user_img,
+		IFNULL(b.user_name,'')AS user_name
+		FROM
+		zs_bk_shop_evaluate_info AS a
+		LEFT JOIN zs_bk_user_info AS b ON a.se_userId = b.userid
+		WHERE
+		a.se_sid = #{shop_id}
+		limit #{stratRows},#{rows}
+
+	</select>
+	<!--查询好评率 -->
+	<select id="getShopevaluationInfo" parameterType="pd"
+		resultType="pd">
+		SELECT a.shop_grade,
+		(SELECT count(c.seid) FROM zs_bk_shop_evaluate_info AS c WHERE
+		c.se_sid=#{shop_id} AND c.se_grade>3)/count(b.seid) AS evaluate
+		FROM zs_bk_shop_info AS a
+		LEFT JOIN zs_bk_shop_evaluate_info AS b
+		ON a.sid=b.se_sid
+		WHERE a.sid=#{shop_id}
+	</select>
+
+	<!-- 查询订单所点菜品列表 -->
+	<select id="getOrderGoodlist" parameterType="pd" resultType="pd">
+			SELECT
+		a.od_goodsId,a.od_goodsName,a.od_goodsNum,a.od_goods_Pmoeny,a.od_goods_Smoeny,IF(b.goods_dis_money=0,1,2)as type
+		FROM zs_bk_order_detail_info as a
+LEFT JOIN zs_bk_goods_info as b ON a.od_goodsId=b.gid
+		WHERE a.od_oNO=#{order_no}
+	</select>
+	<!-- 查询订单总计 -->
+	<select id="orderMoneyTotal" parameterType="pd" resultType="java.lang.Integer">
+		SELECT a.order_money AS od_goods_Smoeny FROM zs_bk_order_info as a
+		WHERE a.order_no=#{order_no}
+	</select>
+	<!-- 查询订单相关信息 -->
+	<select id="getorderInfo" parameterType="pd" resultType="pd">
+		SELECT
+		a.order_no,
+		a.order_type,
+		a.order_money,
+		b.shop_name,
+	ifnull(d.ub_dinersNum,0)as ub_dinersNum,
+CASE d.ub_ISroom WHEN d.ub_ISroom=1 THEN '是' 
+WHEN d.ub_ISroom=0 THEN '否'  else ''END AS ub_ISroom,
+		IFNULL(a.order_pay_type,'')as order_pay_type,
+		IFNULL(a.order_pay_state,'') as order_pay_state,
+		IFNULL(a.order_pay_date,'') as order_pay_date,
+		IFNULL(a.order_state,'') as order_state,
+		IFNULL(c.user_code,'')AS user_code,
+		IFNULL(d.ub_bespeakdate, now()) AS ub_bespeakdate,
+		IF (a.order_commit_time IS NULL,1,2) AS state
+		FROM
+		zs_bk_order_info AS a
+		LEFT JOIN zs_bk_shop_info AS b ON a.order_sid = b.sid
+		LEFT JOIN zs_bk_user_info AS c ON a.order_userId = c.userid
+		LEFT JOIN zs_bk_user_bespeak_info AS d ON a.order_no = d.ub_order_no
+		WHERE a.order_no =#{order_no}
+	</select>
+	<!-- 店员确认订单 -->
+	<update id="confirmOrder" parameterType="pd">
+		update zs_bk_order_info set order_state=#{order_state}
+		,order_commit_time=now() where order_no=#{order_no}
+	</update>
+	<!-- 添加银行卡 -->
+	<insert id="addBankCar" parameterType="pd">
+		insert into
+		zs_bk_shop_bank(id,userid,shop_id,name,Bankname,Bank_no,provinces,branch,state,createTime)
+		values(null,#{userid},#{shop_id},#{name},#{Bankname},#{Bank_no},#{provinces},#{branch},1,now())
+	</insert>
+	<!-- 查询店铺绑定的电话 -->
+	<select id="getShopPhone" parameterType="pd" resultType="java.lang.String">
+		SELECT IFNULL(b.PHONE,'')AS PHONE FROM zs_bk_shop_info AS a
+		LEFT JOIN sys_user AS b
+		ON a.user_id=b.USER_ID
+		WHERE a.sid=#{shop_id}
+	</select>
+	<!-- 更新手机号码到店主下 -->
+	<update id="updateshopUsertel" parameterType="pd">
+		update zs_bk_shop_assistant set bingtel=#{phone} where id=#{userid}
+	</update>
+	<!-- 更新提现表中的验证码 -->
+	<update id="updatesendCode" parameterType="pd">
+		update zs_bk_shop_assistant set code=#{random},codetime=now() where
+		shop_id=#{shop_id} and id=#{userid}
+	</update>
+	<!-- 查询到店主的验证码和验证码获取时间 -->
+	<select id="getUSerTxcode" parameterType="pd" resultType="pd">
+		select a.code,unix_timestamp(a.codetime)as codetime,bingtel from
+		zs_bk_shop_assistant as a where a.id=#{userid}
+	</select>
+	<!-- 执行提现申请 -->
+	<insert id="shopUserTx" parameterType="pd">
+		insert into
+		zs_bk_shop_applymoney(id,shop_id,order_no,bank_no,phone,userid,money,getmoney_time,state)values
+		(null,#{shop_id},#{TXorderNO},#{bankNO},#{bingtel},#{userid},#{money},now(),0)
+	</insert>
+
+	<!-- 根据店主id查询到银行卡列表 -->
+	<select id="getShopBankList" parameterType="pd" resultType="pd">
+		SELECT a.id,a.Bankname,a.Bank_no FROM zs_bk_shop_bank AS a
+		WHERE a.userid=#{userid}
+	</select>
+	<update id="updateShopMoney" parameterType="pd">
+		update zs_bk_shop_info set shop_money=shop_money-#{money} where
+		sid=#{shop_id}
+	</update>
+
+	<!-- 根据订单id查询出店铺tag值 -->
+	<select id="getShoppertag" parameterType="pd" resultType="java.lang.String">
+		SELECT IFNULL(b.tag_name,'')AS tag_name FROM zs_bk_order_info as a
+		LEFT JOIN zs_bk_shop_assistant as b
+		ON a.order_sid=b.shop_id
+		WHERE a.order_no=#{order_no}
+		AND b.type=1
+	</select>
+	<!-- 根据订单id查询出店员tag值 -->
+	<select id="getUsertag" parameterType="pd" resultType="pd">
+		SELECT IFNULL(b.tag_name,'')AS tag_name FROM zs_bk_order_info as a
+		LEFT JOIN zs_bk_shop_assistant as b
+		ON a.order_sid=b.shop_id
+		WHERE a.order_no=#{order_no}
+		AND b.type=2
+		LIMIT 0,1
+	</select>
+
+	<!-- 根据订单id查询推送相关数据 -->
+	<select id="getJPushneedInfo" parameterType="pd" resultType="java.lang.String">
+		SELECT a.order_sid FROM zs_bk_order_info AS a
+		WHERE a.order_no=#{order_no}
+	</select>
+	
+	<!-- 消息推送写入数据库中 -->
+	<insert id="sendJpush" parameterType="pd">
+	insert into zs_bk_shop_IPush_message (id,shop_id,state,sendobject,type,title,order_no,content,datetime)
+	values(null,#{shop_id},#{state},#{sendobject},#{type},#{title},#{order_no},#{content},now())
+	</insert>
+	<!-- 查询店铺下面的消息开启Push值 -->
+	<select id="getShoppush" parameterType="pd" resultType="java.lang.String">
+		select push from zs_bk_shop_info where sid=#{shop_id}
+	</select>
+	<!-- 根据体现的id查询到店铺id然后取到店铺的推送设置值和店铺的tag值 -->
+	<select id="getTXBYidgetshop_id" parameterType="pd" resultType="pd">
+	SELECT a.push,c.tag_name,a.sid as shop_id FROM zs_bk_shop_info AS a
+LEFT JOIN zs_bk_shop_applymoney as b ON a.sid=b.shop_id
+LEFT JOIN zs_bk_shop_assistant AS c ON a.sid=c.shop_id
+WHERE b.id=#{id} AND c.type=1
+	</select>
+	<!-- 查询提现详情 -->
+	<select id="getShopTXmoney" parameterType="pd" resultType="pd">
+	SELECT a.money,a.shop_id FROM zs_bk_shop_applymoney AS a
+    LEFT JOIN zs_bk_shop_info AS b
+    ON a.shop_id=b.sid
+    WHERE a.id=#{id}
+	</select>
+	<!-- 数据库操作 -->
+	<update id="refundShop" parameterType="pd">
+	update zs_bk_shop_info set shop_money=shop_money+#{money} where sid=#{shopid}
+	</update>
+	
+	<!-- 查询确认订单的id查询店铺id -->
+	<select id="getUserCanconfirmder" parameterType="pd" resultType="java.lang.String">
+	SELECT a.order_sid FROM zs_bk_order_info as a
+WHERE a.order_no=#{order_no}
+	</select>
+	<!-- //  查询今日预约订单/明日预约订单 -->
+	
+	<select id="getOrderaboutorderList" parameterType="pd" resultType="pd">
+		SELECT
+		a.order_no,
+		b.user_name,
+		b.user_code,
+		IFNULL(c.ub_bespeakdate, a.order_pay_date) AS ub_bespeakdate,
+		a.order_type,
+		a.order_state,
+		IFNULL(c.ub_dinersNum, 0) AS ub_dinersNum,
+		f.shop_name,
+		SUBSTRING(f.shop_images,1,
+		IF(LOCATE(',',f.shop_images)-1=-1,CHAR_LENGTH(f.shop_images),LOCATE(',',f.shop_images)-1)
+		) as shop_images
+		FROM
+		zs_bk_order_info AS a
+		LEFT JOIN zs_bk_user_info AS b ON a.order_userId = b.userid
+		LEFT JOIN zs_bk_user_bespeak_info AS c ON a.order_no = c.ub_order_no
+		AND a.order_type = 0
+		LEFT JOIN zs_bk_shop_info AS f ON f.sid = a.order_sid
+		WHERE    
+a.order_sid=#{shop_id} 
+<if test="type==1">
+and (a.order_state=2 or a.order_state=1 )  AND  a.order_type=0 AND DATE(c.ub_bespeakdate)=CURDATE() and DATE(a.order_pay_date)=CURDATE()
+</if>
+<if test="type==2">
+and a.order_state=1 AND a.order_type=0 AND DATE(c.ub_bespeakdate)=CURDATE()+1
+</if>
+order by ub_bespeakdate
+limit #{startrows},#{rows}
+	</select>
+	<!-- 查询消费时间在今日的所有订单 -->
+	<select id="getOrdertotalBytoday" parameterType="pd" resultType="java.lang.Integer">
+	SELECT count(a.order_no)
+FROM 
+zs_bk_order_info AS a 
+WHERE 
+a.order_sid=#{shop_id} and a.order_state=2  AND DATE(a.order_commit_time)=CURDATE()
+	</select>
+	<!-- 今日预约订单总数-->
+	<select id="getOrdertotalByaboutday" parameterType="pd" resultType="java.lang.Integer">
+		SELECT count(a.order_no) AS order_totalb
+FROM zs_bk_order_info AS a
+left join zs_bk_user_bespeak_info as b
+on a.order_no=b.ub_order_no
+WHERE
+a.order_sid=#{shop_id}  and  a.order_state=1  AND  a.order_type=0 AND  DATE(a.order_pay_date)=CURDATE()  AND DATE(ub_bespeakdate)=CURDATE()
+	</select>
+	<!-- 查询明日预约订单总数 -->
+	<select id="getOrdertotalBytomoney" parameterType="pd" resultType="java.lang.Integer">
+		SELECT count(a.order_no) AS order_total
+		FROM zs_bk_order_info AS a
+        left join zs_bk_user_bespeak_info as b
+        on a.order_no=b.ub_order_no
+		WHERE
+	    a.order_sid=#{shop_id}  and   a.order_state=1 AND a.order_type=0 AND DATE(ub_bespeakdate)=CURDATE()+1
+		</select>
+		<!-- 今日预约订单总数 -->
+		<select id="getordertotalByYuetomory" parameterType="pd" resultType="java.lang.Integer">
+		SELECT count(a.order_no)
+FROM 
+zs_bk_order_info AS a 
+LEFT JOIN zs_bk_user_bespeak_info AS b
+ON a.order_no=b.ub_order_no
+WHERE 
+a.order_sid=#{shop_id} and (a.order_state=2 or a.order_state=1 ) AND  a.order_type=0 and DATE(a.order_pay_date)=CURDATE() AND DATE(ub_bespeakdate)=CURDATE()
+		</select>
+		<!-- 查询 今日进店还未消费的订单总数 -->
+		<select id="getHordertotal" parameterType="pd" resultType="java.lang.Integer">
+		SELECT count(a.order_no)
+FROM 
+zs_bk_order_info AS a 
+WHERE 
+a.order_sid=#{shop_id} and a.order_state=1 AND a.order_type=1  AND DATE(a.order_pay_date)=CURDATE()
+		</select>
+		<!-- 根据用户的id查询到当前登录者的regid -->
+		<select id="getUseregID" parameterType="pd" resultType="java.lang.String">
+			SELECT a.onlycode FROM zs_bk_shop_assistant as
+ a WHERE a.id=#{userid}
+		</select>
+		
+		<!-- 查询店铺的消息设置详情 -->
+		<select id="getShopMessagePage" parameterType="pd" resultType="java.lang.String">
+			SELECT a.push FROM zs_bk_shop_info as
+            a WHERE a.sid=#{shop_id}
+		</select>
+</mapper>

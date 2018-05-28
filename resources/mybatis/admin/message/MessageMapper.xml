@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MessageMapper">
+	<!-- 删除系统推送消息 -->
+	<delete id="deleteMessage" parameterType="pd">
+		delete from
+		zs_bk_user_message where umid=#{umid} and um_msg_type=1
+	</delete>
+	<!-- admin查询系统消息列表 -->
+	<select id="geteMessagelistPage" resultType="pd">
+		SELECT
+		z.umid,z.um_msgcontent,z.um_msgtitle,z.u_tuistate,z.um_msgdate FROM
+		zs_bk_user_message AS z WHERE z.um_msg_type=1
+	</select>
+
+	<!-- admin添加推送消息 -->
+
+	<insert id="addMessage" parameterType="pd">
+		insert into
+		zs_bk_user_message(umid,um_msg_type,um_msgdate,um_msgcontent,um_msgtitle,u_tuistate)
+		values(null,#{um_msg_type},now(),#{um_msgcontent},#{um_msgtitle},#{u_tuistate})
+	</insert>
+
+	<!-- 修改推送消息状态 -->
+	<update id="updateMessagestate" parameterType="pd">
+		update
+		zs_bk_user_message set u_tuistate=#{u_tuistate} where umid=#{umid}
+	</update>
+
+	<!-- 用户查询消息列表 -->
+	<select id="getUserMsglist" parameterType="pd" resultType="pd">
+		SELECT
+		z.umid,
+		z.um_msgcontent,
+		z.umremark,
+		z.u_tuistate,
+		z.um_msgdate
+		FROM
+		zs_bk_user_message AS z
+		WHERE
+		z.um_msg_type = 1
+		AND
+		z.um_userId=#{um_userId}
+		ORDER BY
+		z.um_msgdate DESC
+		limit
+		#{stratrows},#{rows}
+	</select>
+	<!-- 加入商铺加盟 -->
+	<insert id="shopAdd" parameterType="pd">
+		insert into
+		zs_bk_shopjoin(id,shop_name,shop_type,shop_adress,shop_phone,create_time)values(null,#{shop_name},#{shop_type},#{shop_adress},#{shop_phone},now())
+	</insert>
+	<!-- 查询判断用户是否已经提交过了 -->
+	<select id="getShopIsapply" parameterType="pd" resultType="pd">
+		select count(id) from zs_bk_shopjoin where shop_phone=#{shop_phone}
+	</select>
+	<!-- 查询商家加盟申请列表 -->
+	<select id="getsharelistPage" parameterType="pd" resultType="pd">
+		select id,shop_name,shop_type,shop_adress,shop_phone,create_time from
+		zs_bk_shopjoin order by create_time desc
+	</select>
+	<!-- 删除加盟商信息 -->
+	<delete id="deleteshare" parameterType="pd">
+		delete  from zs_bk_shopjoin where id=#{id}
+	</delete>
+	
+	<!-- 查询山莓商户端的推送消息列表 -->
+	<select id="getshanmeibackMessagelistPage" parameterType="pd" resultType="pd">
+		SELECT a.id,a.title,a.content,a.state,a.datetime FROM zs_bk_shop_ipush_message as
+a WHERE a.type=5  ORDER BY a.datetime,a.state DESC 
+	</select>
+	<!-- 新增推送消息 -->
+	<insert id="backaddMessage" parameterType="pd">
+	insert into zs_bk_shop_ipush_message(id,state,type,content,title,datetime)values(null,1,5,#{content},#{title},now())
+	</insert>
+	<!-- 删除系统消息 -->
+	<delete id="shopdeleteMessage" parameterType="pd">
+	delete * from zs_bk_shop_ipush_message where id=#{id}
+	</delete>
+	<!-- 商铺消息推送 -->
+	<update id="updatebackMessagestate" parameterType="pd">
+	update zs_bk_shop_ipush_message set state=#{state},datetime=now() where id=#{id}
+	</update> 
+</mapper>

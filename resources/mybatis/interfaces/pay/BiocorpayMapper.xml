@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="BiocorpayMapper">
+	<!-- 判断该订单是否已经支付 -->
+	<select id="getorderpayIsOrNo" parameterType="pd" resultType="java.lang.Integer">
+		SELECT count(z.oid) FROM zs_bk_order_info as z WHERE
+		z.order_no=#{order_no} AND z.order_state=1
+	</select>
+
+	<!-- 用户选择支付方式更新 -->
+	<update id="updatePaytype" parameterType="pd">
+		update zs_bk_order_info
+		set order_pay_type=#{order_pay_type} where
+		order_no=#{order_no}
+	</update>
+
+	<!-- 判断该订单是否存在 -->
+	<select id="findOrderByorderAndUser" parameterType="pd"
+		resultType="java.lang.Integer">
+		SELECT count(z.oid) AS count FROM zs_bk_order_info AS z
+		where
+		z.order_no=#{order_no} AND z.order_userId=#{order_userId}
+	</select>
+
+	<!-- 查询用户的余额 -->
+	<select id="getUsermoney" parameterType="pd" resultType="java.lang.Double">
+		SELECT
+		z.user_money FROM zs_bk_user_info AS z WHERE z.userid=#{order_userId}
+	</select>
+
+	<!-- 更新用户余额 -->
+	<update id="updateUserYumoney" parameterType="pd">
+		update
+		zs_bk_user_info
+		set user_money=#{endmoeny} where userid=#{order_userId}
+	</update>
+	<!-- 修改订单状态 -->
+	<update id="updateOrderpayState" parameterType="pd">
+		update
+		zs_bk_order_info
+		set order_pay_state=#{order_pay_state}
+		,order_pay_type=#{order_pay_type},order_state=#{order_state},order_pay_date=now()
+		where
+		order_no=#{order_no} and order_userId=#{order_userId}
+	</update>
+
+	<!-- 添加用户消费记录 -->
+	<insert id="insertwithdraw" parameterType="pd">
+		insert into
+		zs_bk_user_withdraw_info(uwid,uw_userId,uw_createdate,uw_type,uw_money)
+		values(null,#{uw_userId},now(),#{uw_type},#{uw_money})
+	</insert>
+
+	<!-- 支付宝支付修改订单状态 -->
+	<update id="payUpdateOrderState" parameterType="pd">
+		update
+		zs_bk_order_info
+		set
+		order_pay_state=#{order_pay_state},order_money=#{order_money}
+		,order_state=#{order_state},order_pay_date=now()
+		where
+		order_no=#{order_no}
+	</update>
+
+	<!-- 根据订单号查询用户的id -->
+	<select id="getuseridbyOrderNO" parameterType="pd" resultType="java.lang.String">
+		SELECT z.order_userId FROM zs_bk_order_info AS z WHERE
+		z.order_no=#{order_no}
+	</select>
+
+	<!-- 阿里支付向用户推送订单信息 -->
+	<insert id="saveMessageByorder" parameterType="pd">
+		insert into
+		zs_bk_user_message(umid,um_userId,um_msg_type,um_orderId,um_orderNO,
+		    um_msgdate,um_msgcontent,u_tuistate,um_msgtitle)
+		values(null,#{um_userId},#{um_msg_type},#{um_orderId},#{um_orderNO},now(),
+		    #{um_msgcontent},#{u_tuistate},#{um_msgtitle})
+	</insert>
+	<!-- 查询订单主键 店铺id 店铺名称 -->
+	<select id="getorderId" parameterType="pd" resultType="pd">
+		SELECT
+		a.oid ,a.order_sid,a.order_shopName FROM zs_bk_order_info as a where
+		a.order_no=#{order_no}
+	</select>
+	<!-- 查询用户的详细信息 -->
+	<select id="getUserInfo" parameterType="pd" resultType="java.lang.String">
+		SELECT
+		a.user_code FROM zs_bk_user_info AS a WHERE a.userid=#{order_userId}
+	</select>
+
+	<!-- 预添加用户奖励进度 -->
+	<insert id="insertuserRate" parameterType="pd">
+		insert into
+		zs_bk_user_rate(usid,us_userid,us_usertel,us_sid,us_shopname,us_oid,us_oNO,us_rate,us_createdate)
+		values(null,#{us_userid},#{us_usertel},#{us_sid},#{us_shopname},#{us_oid},#{order_no},#{us_rate},now())
+	</insert>
+	<!-- 查询用户的手机号码和用户id根据订单查询 -->
+	<select id="getUserIDandmoble" parameterType="pd" resultType="pd">
+		SELECT
+		b.userid,
+		b.user_code
+		FROM
+		zs_bk_order_info AS a,
+		zs_bk_user_info AS
+		b
+		WHERE
+		a.order_userId = b.userid
+		AND a.order_no =#{order_no}
+	</select>
+	<!-- 查询奖金池各个金额 -->
+	<select id="getprizepoolinfo" resultType="pd">
+		SELECT
+		a.bpid,a.bp_money,a.bp_min_money,a.bp_distributable,a.bp_distributable_min
+		FROM
+		zs_bk_prizepool_info AS a
+	</select>
+	<!--用户消费成功后注入资金到奖金池 -->
+	<update id="updateprizepool" parameterType="pd">
+		update zs_bk_prizepool_info set bp_money = bp_money + #{omoney},
+		    bp_profit = bp_profit + #{profit} 
+		WHERE bpid=#{bpid}
+	</update>
+
+	<!-- 更新奖金金额维持金额流动 -->
+	<update id="updateBonuspools" parameterType="pd">
+		update
+		zs_bk_prizepool_info set
+		bp_distributable=#{bp_distributable}WHERE
+		bpid=#{bpid}
+	</update>
+	<!-- 查询用户的支付密码 -->
+	<select id="getUserpaypwd" parameterType="pd" resultType="java.lang.String">
+		SELECT
+		IFNULL(a.user_pay_pwd,'') AS paypwd FROM zs_bk_user_info AS a WHERE
+		a.userid=#{order_userId}
+	</select>
+	
+	
+	<!-- **************************************************************** -->
+	<!-- 查询用户的支付密码 -->
+	<select id="getOrderInfo" parameterType="pd" resultType="pd">
+		SELECT a.order_no,a.order_money
+		FROM zs_bk_order_info a
+		where a.order_no=#{order_no}
+	</select>
+	
+	
+	<!-- ******************************************************************* -->
+	<!-- 商户账单计算 -->
+	<update id="updateShopMoney" parameterType="pd">
+		update zs_bk_shop_info set shop_money = shop_money + #{shop_money}
+		WHERE sid=#{sid}
+	</update>
+	
+	<!-- 插入发放记录 -->
+	<insert id="addPrizeLog" parameterType="pd">
+	    insert into zs_bk_prizegift_log(
+	        user_id,order_no,prize_lv,prize_jd,prize_add,prize_allnum,prize_num,
+	        prize_time,state,createtime) 
+	    values(#{user_id},#{order_no},#{prize_lv},#{prize_jd},#{prize_add},#{prize_allnum},#{prize_num},
+	        #{prize_time},#{state},#{createtime})
+	</insert>
+	
+	
+</mapper>

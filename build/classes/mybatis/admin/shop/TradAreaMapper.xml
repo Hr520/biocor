@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="tradAreaMapper">
+
+    <!-- 查询商圈列表 -->
+	<select id="findTradArealistPage" parameterType="pd" resultType="pd" useCache="false">
+		SELECT a.id,a.street,a.streetID,a.father,a.hats_createdate,a.hats_remark,
+            b.areaID,b.area,
+            c.cityID,c.city,
+            d.provinceID,d.province
+        FROM hat_street a
+        LEFT JOIN base_provincecityarea b ON a.father = b.areaID
+        LEFT JOIN hat_city c ON b.father = c.cityID 
+        LEFT JOIN hat_province d ON c.father = d.provinceID
+        WHERE 1=1  
+		<if test="pd.tradAreaName != null">    
+		    and a.street like '%${pd.tradAreaName}%' 
+		</if>
+		order by a.hats_createdate desc
+	</select>
+
+	<!-- 添加商圈 -->
+	<insert id="addTradArea" parameterType="pd" useGeneratedKeys="true" keyProperty="sid">
+	    insert into hat_street(
+	        street,streetID,father,hats_createdate,hats_remark
+	        )
+	    values(
+	        #{street},#{streetID},#{father},#{hats_createdate},#{hats_remark}
+	        )
+	</insert>	
+	
+	<!-- 删除商圈 -->
+	<delete id="delTradArea" parameterType="pd">
+	    delete from hat_street where id=#{id}
+	</delete>	
+
+
+    <!-- 省市区 -->
+    <select id="findAllProvince" parameterType="pd" resultType="pd" useCache="false">
+        select a.provinceID,a.province from hat_province a where 1=1
+    </select>
+    <select id="findAllCity" parameterType="pd" resultType="pd" useCache="false">
+        select a.cityID,a.city,a.father from hat_city a where a.father=#{father}
+    </select>
+    <select id="findAllArea" parameterType="pd" resultType="pd" useCache="false">
+        select a.areaID,a.area,a.father from base_provincecityarea a where a.father=#{father}
+    </select>
+    <select id="findAllStreet" parameterType="pd" resultType="pd" useCache="false">
+        select a.street,a.streetID,a.father from hat_street a where a.father=#{father}
+    </select>
+
+</mapper>

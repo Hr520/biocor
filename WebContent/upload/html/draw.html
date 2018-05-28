@@ -1,0 +1,132 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>抽奖</title>
+    <link rel="stylesheet" type="text/css" href="css/swiper.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/swiper.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+<script type="text/javascript">
+	$(function() {
+		var url = GetRequest();
+		var orderNo = url.orderNo;
+		var userid = url.userid;
+		
+		$(".draw-ul li").click(function() {
+			
+			$.ajax({
+				type: "POST",
+				url: '/interface/orderprize/getPriceLevel',
+		    	data: {
+		    		userid:userid,
+		    		orderNo:orderNo,
+		    		tm:new Date().getTime()
+		    	},
+				dataType:'json',
+				cache: false,
+				success: function(data){
+					
+					if("success" == data.state){
+						var plevel = data.plevel;
+						var money = data.money;
+						
+						$("#money").html(money);
+						$("#level").html(plevel);
+						
+						$("#shadow").show();
+						$(".reply").show();
+						location.href="xxx";
+					}else{
+						alert("您没有抽奖机会了!");
+						location.href="xxx";
+					}
+				}
+	        });
+			
+			
+		});
+		$("#close").click(function() {
+			$("#shadow").hide();
+			$(".reply").hide();
+		})
+	});
+	
+	function GetRequest() {
+		var url = location.search; //获取url中"?"符后的字串 
+		var theRequest = new Object();
+		if (url.indexOf("?") != -1) {
+			var str = url.substr(1);
+			strs = str.split("&");
+			for (var i = 0; i < strs.length; i++) {
+				theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+			}
+		}
+		return theRequest;
+	}
+</script>    
+</head>
+<body style="background:#393939;">
+    <div class="mask1" id="shadow"></div>
+    <div class="reply">
+        <div class="close" id="close"></div>
+        <div class="draw-pic">
+            <img src="images/draw-pic1.png">
+            <div class="d-abs">
+                <div class="d-left"><em>￥</em>
+                    <span id="money"></span>
+                </div>
+                <div class="xf-div">消费金额X<span id="level"></span>%</div>
+           <!-- <div class="je-div">此金额将立即到达账户</div> -->
+            </div>
+            <div class="dd-abs">
+                注：抽到奖可以在“我的奖励”中进行查看加速度奖励进度。
+            </div>
+            <div class="btn-abs">
+                <a href="zj-fx.html" class="fx-btn">分享到朋友圈</a>
+            </div>
+        </div>
+    </div>
+    <div class="wrapper">
+        <div class="main" >
+            <div class="draw-bg">
+                <img src="images/draw-bg.png" class="all-img" >
+                <div class="wrap">
+                    <div class="draw-box">
+                        <ul class="draw-ul clearfix">
+                            <li><img src="images/draw-pic.png" class="all-img"></li>
+                            <li><img src="images/draw-pic.png" class="all-img"></li>
+                            <li><img src="images/draw-pic.png" class="all-img"></li>
+                            <li><img src="images/draw-pic.png" class="all-img"></li>
+                            <li><img src="images/draw-pic.png" class="all-img"></li>
+                            <li><img src="images/draw-pic.png" class="all-img"></li>
+                        </ul>
+                        <div class="draw-content">
+                            <div>规则说明：</div>
+                            <div>1.本平台消费支付完成即可获得一次抽奖机会，抽奖限时30分钟，超过时限本次抽奖机会作废。
+<br>2.抽奖所获得奖励在“我的奖励”中查看，奖励进度可用积分购买加速卡加速，加速进度到100%即可领取奖励，在“我的钱包”中查看。
+<br>3.未消费订单领取奖励后不支持取消订单。
+<br>4.抽奖环节的所有解释权归山莓平台所有,与苹果公司无关。</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+/*
+    $(function(){
+        $(".draw-ul li").click(function(){
+            $("#shadow").show();
+            $(".reply").show();
+        });
+        $("#close").click(function(){
+            $("#shadow").hide();
+            $(".reply").hide();
+        })
+    })*/
+</script>
+</body>
+</html>

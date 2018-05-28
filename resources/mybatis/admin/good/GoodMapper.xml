@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="goodMapper">
+
+	<!-- 查询商品列表 -->
+	<select id="findGoodlistPage" parameterType="pd" resultType="pd"
+		useCache="false">
+		select a.gid,a.goods_name,a.goods_moeny,a.goods_dis_money,
+		a.goods_images,a.goods_gtid,a.goods_sid,a.goods_createdate,
+		a.goods_ISrecommend,a.goods_remark,a.goods_taste,
+		a.goods_ISshelves,a.goods_up_shelves,a.goods_dw_shelves,a.goods_time,
+		b.shop_name,c.ft_foodtype_name
+		from zs_bk_goods_info a
+		left join zs_bk_shop_info b on a.goods_sid = b.sid
+		left join zs_bk_goodstype_info c on a.goods_gtid = c.ftid
+		where 1=1
+		<if test="pd.goodName != null and pd.goodName != ''">
+			and a.goods_name like '%${pd.goodName}%'
+		</if>
+		<if test="pd.shopName != null and pd.shopName != ''">
+			and b.shop_name like '%${pd.shopName}%'
+		</if>
+		<if test="pd.stype != null and pd.stype != ''">
+			and a.goods_gtid = #{pd.stype }
+		</if>
+		<if test="pd.type != 1">
+			and b.user_id = #{pd.userid}
+		</if>
+		<if test="pd.goods_ISshelves!= null and pd.goods_ISshelves!=''">
+			and	a.goods_ISshelves=#{pd.goods_ISshelves}
+		</if>
+		<if test="pd.goods_type!=null and pd.goods_type!=''">
+			and a.goods_gtid=#{pd.goods_type}
+		</if>
+		order by a.goods_createdate desc
+	</select>
+
+	<!-- 添加商品 -->
+	<insert id="addGood" parameterType="pd" useGeneratedKeys="true"
+		keyProperty="sid">
+		insert into zs_bk_goods_info(
+		goods_name,goods_moeny,goods_dis_money,
+		goods_images,goods_gtid,goods_sid,goods_createdate,
+		goods_ISrecommend,goods_remark,goods_taste,
+		goods_ISshelves,goods_up_shelves,goods_dw_shelves,
+		goods_time
+		)
+		values(
+		#{goods_name},#{goods_moeny},#{goods_dis_money},
+		#{goods_images},#{goods_gtid},#{goods_sid},#{goods_createdate},
+		#{goods_ISrecommend},#{goods_remark},#{goods_taste},
+		#{goods_ISshelves},#{goods_up_shelves},#{goods_dw_shelves},
+		#{goods_time}
+		)
+	</insert>
+
+	<!-- 根据商品ID查询商品详情 -->
+	<select id="findGoodBySid" parameterType="pd" resultType="pd"
+		useCache="false">
+		select a.gid,a.goods_name,a.goods_moeny,a.goods_dis_money,
+		a.goods_images,a.goods_gtid,a.goods_sid,a.goods_createdate,
+		a.goods_ISrecommend,a.goods_remark,a.goods_taste,
+		a.goods_ISshelves,a.goods_up_shelves,a.goods_dw_shelves,a.goods_time,
+		b.shop_name
+		from zs_bk_goods_info a
+		left join zs_bk_shop_info b on a.goods_sid = b.sid
+		where 1=1 and a.gid=#{gid}
+	</select>
+
+	<!-- 修改商品 -->
+	<update id="updateGood" parameterType="pd">
+		update zs_bk_goods_info set
+		goods_name=#{goods_name},goods_moeny=#{goods_moeny},goods_dis_money=#{goods_dis_money},
+		goods_images=#{goods_images},goods_gtid=#{goods_gtid},goods_sid=#{goods_sid},
+		goods_createdate=#{goods_createdate},
+		goods_remark=#{goods_remark},goods_taste=#{goods_taste},
+		goods_up_shelves=#{goods_up_shelves},
+		goods_dw_shelves=#{goods_dw_shelves},
+		goods_time=#{goods_time}
+		where gid=#{gid}
+	</update>
+
+	<!-- 删除商品 -->
+	<update id="deleteGood" parameterType="pd">
+		update zs_bk_goods_info set goods_ISshelves = #{state} where gid=#{gid}
+	</update>
+
+	<!-- 查询所有商品类型 -->
+	<select id="findAllGoodType" parameterType="pd" resultType="pd"
+		useCache="false">
+		select a.ftid,a.ft_foodtype_name from zs_bk_goodstype_info a
+	</select>
+
+	<!-- 通过用户ID查询店铺 -->
+	<select id="findShopByUserid" parameterType="pd" resultType="pd"
+		useCache="false">
+		select a.sid,a.shop_name
+		from zs_bk_shop_info a
+		where a.user_id=#{userid}
+	</select>
+	<!-- 查询所有店铺新上菜品列表审核 -->
+	<select id="getallShopNewgoodslistPage" parameterType="pd" resultType="pd">
+		select a.gid,a.goods_name,a.goods_moeny,a.goods_dis_money,
+		a.goods_images,a.goods_gtid,a.goods_sid,a.goods_createdate,
+		a.goods_ISrecommend,a.goods_remark,a.goods_taste,
+		a.goods_ISshelves,a.goods_up_shelves,a.goods_dw_shelves,a.goods_time,
+		b.shop_name,c.ft_foodtype_name
+		from zs_bk_goods_info a
+		left join zs_bk_shop_info b on a.goods_sid = b.sid
+		left join zs_bk_goodstype_info c on a.goods_gtid = c.ftid
+		where a.goods_ISshelves=0
+		order by a.goods_createdate desc
+	</select>
+</mapper>

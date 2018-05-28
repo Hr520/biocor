@@ -1,0 +1,173 @@
+<!Doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=no">
+<title>商户详情</title>
+<link rel="stylesheet" type="text/css" href="css/swiper.min.css">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+
+<script src="js/swiper.min.js"></script>
+<script src="js/jquery.min.js"></script>
+<script type="text/javascript">
+var id1 = "";
+$(function() {
+	var url = GetRequest();
+	id1 = url.id;
+	$.ajax({
+		type : "POST",
+		url : '/interface/shoporder/getshopInfoH5?uf_sid='+ id1,
+		dataType : 'json',
+		cache : false,
+		success : function(data) {
+			if ("0" == data.state) {
+				var images = data.data.shop_images;
+				var s = images.split(',')
+				var imgs = "";
+				for (var i = 0; i < s.length; i++) {
+					var u = "/" + s[i]
+					imgs = imgs
+						+ "<div class=\"swiper-slide\">"
+						+ "<img class=\"all-img\" src=\""+u+"\">"
+						+ "</div>";
+				}
+				
+				if (s.length == 1){
+					$("#swiper").hide();
+				}
+
+				var dd = "";
+				var start = data.data.shop_grade;
+				for (var i = 0; i < 5; i++) {
+					if (i < start) {
+						dd += " <li class='light'><a href='javascript:;'>"
+							+ (i + 1) + "</a></li>";
+					} else {
+						dd += " <li><a href='javascript:;'>"
+							+ (i + 1) + "</a></li>";
+					}
+				}
+				//$("#img1").html(imgs1);
+				$("#shop_adders").html(data.data.shop_adders);
+				$("#img").html(imgs);
+				$("#shop_name").html(data.data.shop_name);
+				$("#shop_consume").html(data.data.shop_consume);
+				$("#shop_tel").attr("href","tel:" + data.data.shop_tel);
+				$("#shop_grade").html(dd);
+				$("#shop_time").html(data.data.shop_time);
+
+				var mapurl = "map.html?sid=" + id1;
+				$("#mapurl").attr("href", mapurl);
+				
+				var mySwiper = new Swiper('.swiper-container', {
+					autoplay : 3000,//可选选项，自动滑动
+					pagination : '.swiper-pagination'
+				})
+			}
+		},
+	});
+});
+
+
+function GetRequest() {
+	var url = location.search; //获取url中"?"符后的字串 
+	var theRequest = new Object();
+	if (url.indexOf("?") != -1) {
+		var str = url.substr(1);
+		strs = str.split("&");
+		for (var i = 0; i < strs.length; i++) {
+			theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+		}
+	}
+	return theRequest;
+}
+function jump(){
+	 var u = navigator.userAgent;
+		var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+		var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+	//判断是否是安卓
+	if(isAndroid){
+		var url = GetRequest();
+		var id = url.id;
+		$.ajax({
+			type : "POST",
+			url : '/interface/shoporder/getshopInfoH5?uf_sid='+ id,
+			dataType : 'json',
+			cache : false,	
+			success:function(data){
+				if (data.state=="0") {
+					 var url = "http://m.amap.com/navi/?start=&dest="+data.data.shop_longitude+","+data.data.shop_latitude
+		    		   +"&destName="+data.data.shop_name+"&key=d3f5d8b3b05231fa6a11375492310e3a";
+					 url="http://m.amap.com/navi/?dest="+data.data.shop_longitude+","+data.data.shop_latitude
+		    		   +"&destName="+data.data.shop_name+"&key=d3f5d8b3b05231fa6a11375492310e3a";
+					alert(data.data.shop_adders+"&"+data.data.shop_latitude+"&"+data.data.shop_longitude+"&"+url);
+				}else{
+					 $("#iframe").attr("src",encodeURI("http://m.amap.com/navigation/index/saddr=&daddr=114.36884993674299,30.51374728263799,test2&src=litemap&utm_source=litemap")); 
+						location.href="http://m.amap.com/navigation/index/saddr=&daddr=114.36884993674299,30.51374728263799,test2&src=litemap&utm_source=litemap"; 
+				}
+				
+			}
+		});
+	}else{
+		location.href="map.html?sid="+id1;
+	}
+
+}
+</script>
+</head>
+<body style="background: #f5f5f5;">
+	<div class="wrapper">
+		<div class="main">
+			<section class="banner">
+				<div class="swiper-container">
+					<div class="swiper-wrapper" id="img">
+				
+					</div>
+					<div class="swiper-pagination" id="swiper"></div>
+				</div>
+			</section>
+			<section class="s1">
+				<div class="wrap clearfix" style="position: relative">
+					<div class="mxq-left" style="width: 100%">
+						<h3 class="sh-title">
+							<span id="shop_name"></span>
+						</h3>
+						<ul class="star-ul" id="shop_grade">
+
+						</ul>
+						<div class="money">
+							人均消费：￥<span id="shop_consume"></span>
+						</div>
+					</div>
+
+				</div>
+			</section>
+			<section class="s2">
+				<div class="wrap">
+				    
+					<ul class="list-ul">
+                        <li class="first-li">营业时间：<span id="shop_time"></span></li>
+                        <li class="no_line clearfix second-li rel">
+                            <a href="javascript:void(0)" onclick="jump()">
+                                <div class="m2-left"><span id="shop_adders"></span></div>
+                            </a>
+                           <a id="shop_tel" href="tel:027-84784696">
+                               <img src="images/call.png"  style="position: absolute;right:6%;top:0;bottom:0;margin: auto  " width="20" height="20">
+                           </a>
+                        </li>
+                    </ul>
+					
+					
+					
+				</div>
+			</section>
+			<section class="s3">
+				<div class="m-des">本店支持吃饭抽奖，奖励100%</div>
+				<div class="m-des1">（限在线付款金额部分）</div>
+			</section>
+		</div>
+	</div>
+</body>
+</html>

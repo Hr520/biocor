@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="myWalletMapper">
+	<!-- 我的钱包 -->
+	<select id="myWalletInfo" resultType="pd">
+		select u.user_money,ifnull(sum(t.uw_money),0) as tx_money,
+		    IFNULL(SUM(t.uw_money),0)+u.user_money AS all_money
+		from zs_bk_user_info u 
+		left join zs_bk_user_withdraw_info t on u.userid = t.uw_userId
+		where u.userid = #{userid} and t.uw_state = 0 and t.uw_type in (0,1)
+	</select>
+	<!-- 根据userid查询用户余额 -->
+	<select id="getUserMoney" parameterType="pd" resultType="java.lang.Float">
+		select user_money from zs_bk_user_info where userid = #{userid}
+	</select>
+	<!-- 根据userid查询用户支付密码 -->
+	<select id="getUserPayPwd" parameterType="pd" resultType="java.lang.String">
+		select user_pay_pwd from zs_bk_user_info where userid = #{userid}
+	</select>
+	<!-- 查询提现验证码 -->
+	<select id="getTxverifycode" parameterType="pd" resultType="java.lang.String">
+		select ua_user_verifycode from zs_bk_user_account_info where ua_userId = #{userid}
+	</select>
+	<!-- 添加用户提现申请 -->
+	<insert id="withdrawApply" parameterType="pd">
+		insert into zs_bk_user_withdraw_info (uw_userId,uw_createdate,uw_type,uw_remark,uw_money,uw_orderNO,uw_state) 
+		values (#{userid},now(),#{uw_type},#{uw_remark},#{uw_money},#{uw_orderNO},#{uw_state})
+	</insert>
+	<!-- 修改用户可用余额 -->
+	<update id="updateUserMoney" parameterType="pd">
+		update zs_bk_user_info set user_money = #{user_money} where userid = #{userid}
+	</update>
+	<!-- 查询用户余额明细列表 -->
+	<select id="getmyWalletDetails" parameterType="pd" resultType="pd">
+		select uw_createdate,uw_type,uw_money
+		from zs_bk_user_withdraw_info 
+		where uw_userId = #{userid}
+		order by uw_createdate desc
+		limit #{num},#{everypage}
+	</select>
+	<!-- 点击提现按钮查询余额和支付宝账号 -->
+	<select id="getBalanceAndAlipay" parameterType="pd" resultType="pd">
+		select u.userid,u.user_money,a.ua_user_account
+		from zs_bk_user_info u 
+		left join zs_bk_user_account_info a on u.userid = a.ua_userId
+		where u.userid = #{userid}
+	</select>
+	<!-- 查询用户有没有支付宝账号 -->
+	<select id="hasAlipay" parameterType="pd" resultType="java.lang.Integer">
+		select count(ua_userId) from zs_bk_user_account_info where ua_userId = #{userid}
+	</select>
+	<!-- 新增支付宝账号 -->
+	<insert id="addAlipay" parameterType="pd">
+		insert into zs_bk_user_account_info (ua_userId,ua_user_account) 
+		values (#{userid},#{ua_user_account})
+	</insert>
+</mapper>

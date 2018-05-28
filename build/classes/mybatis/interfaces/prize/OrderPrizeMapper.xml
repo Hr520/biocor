@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="orderPrizeMapper">
+
+	<!-- 通过订单ID查询订单详情 -->
+    <select id="getOrderInfoByNo" parameterType="pd" resultType="pd">
+        SELECT a.oid,a.order_no,a.order_repast_date,a.order_sid,a.order_money,a.order_pay_state,a.order_state,
+            b.user_name,b.user_code,
+            c.shop_name,c.shop_images
+        FROM zs_bk_order_info a
+        LEFT JOIN zs_bk_user_info b ON a.order_userId = b.userid
+        LEFT JOIN zs_bk_shop_info c ON a.order_sid = c.sid
+        WHERE a.order_no = #{orderNo} 
+    </select>
+	
+	
+	<!-- 抽奖调用存储过程 -->
+	<select id="getPrizeInfo" parameterType="pd" resultType="pd">
+		{call
+		OrderPrizeProcedure(#{userid},#{ordermoney},#{orderNo})}
+	</select>
+	
+	<!-- 订单是否能抽奖 -->
+	<select id="isOrderCanPrize" parameterType="pd" resultType="pd">
+		SELECT COUNT(*) as num
+		FROM zs_bk_user_rate X  
+		WHERE x.us_oNO=#{orderNo}
+	</select>
+	
+	<!-- 订单是否抽过奖 -->
+	<select id="isOrderPrize" parameterType="pd" resultType="pd">
+		SELECT COUNT(*) as num
+		FROM zs_bk_user_prize X  
+		WHERE x.up_oNO=#{orderNo}
+	</select>
+	
+	<!-- 订单是否领取奖励 -->
+	<select id="isOwnOrderPrize" parameterType="pd" resultType="pd">
+		SELECT a.us_state
+		FROM zs_bk_user_rate a 
+		WHERE a.us_oNO=#{orderNo}
+	</select>
+	
+	
+	
+	<!-- 获取2小时候的预约订单列表 -->
+	<select id="getBespeakOrder" parameterType="pd" resultType="pd">
+		SELECT a.ubid,a.ub_userId,a.ub_order_no
+        FROM zs_bk_user_bespeak_info a
+        LEFT JOIN zs_bk_order_info b ON a.ub_order_no = b.order_no
+        WHERE NOW() > DATE_SUB(a.ub_bespeakdate, INTERVAL 2 HOUR) 
+        AND b.order_pay_state = 1 and b.order_state = 1 and a.ub_isremind = 0 
+	</select>
+	
+	<!-- 更改预约提醒状态 -->
+	<update id="updateBespeakOrder" parameterType="pd">
+	    update zs_bk_user_bespeak_info set ub_isremind =1 where ubid=#{ubid}
+	</update>
+	
+	<!-- 查询奖金池列表 -->
+	<select id="findPrizePool" parameterType="pd" resultType="pd" useCache="false">
+		select a.bpid,a.bp_money,a.bp_min_money,a.bp_distributable,
+		    a.bp_distributable_min,a.bp_allocated,a.bp_distributable_men,
+		    a.bp_increasing_rate,a.bp_createdate,a.bp_remark
+		from zs_bk_prizepool_info a 
+		order by a.bp_createdate desc 
+	</select>
+	
+	
+	<!-- 查询每日发放的订单信息总数 -->
+	<select id="findDayGrantOrderInfoCount" parameterType="pd" resultType="pd" useCache="false">
+		SELECT count(1) as num
+		FROM zs_bk_user_rate a
+		LEFT JOIN zs_bk_order_info b ON b.order_no = a.us_oNO
+		WHERE a.up_pgId IS NOT NULL AND a.us_rate <![CDATA[<]]> 1
+		AND b.order_state !=4 AND b.order_state !=5
+		ORDER BY a.us_rate DESC
+	</select>
+	<!-- 查询每日发放的订单信息数 -->
+	<select id="findDayGrantOrderInfo" parameterType="pd" resultType="pd" useCache="false">
+		SELECT a.usid,a.us_oNO,a.us_rate,a.us_createdate,a.us_userid
+		FROM zs_bk_user_rate a
+		LEFT JOIN zs_bk_order_info b ON b.order_no = a.us_oNO
+		WHERE a.up_pgId IS NOT NULL AND a.us_rate <![CDATA[<]]> 1
+		AND b.order_state !=4 AND b.order_state !=5
+		ORDER BY a.us_rate DESC
+		limit 0,#{num}
+	</select>
+	
+	<!-- 加速率新增 -->
+	<update id="updateOrderRate" parameterType="pd">
+	    update zs_bk_user_rate set us_rate = us_rate + #{rate}
+	    where usid=#{usid}
+	</update>
+	
+	<!-- 当进度为1的时候改状态为可领取 -->
+	<update id="updatepayratestate" parameterType="pd">
+		update zs_bk_user_rate set us_state=#{us_state} where  usid=#{usid}
+	</update>
+	<!-- 订单退订状态 -->
+	<select id="getOrderReturnInfo" parameterType="pd" resultType="pd" useCache="false">
+		select a.tu_id,a.cancel_no,a.order_no,a.cancel_time,a.cancel_moeny,
+		    a.cancel_state,a.cancel_userid,a.cancel_type,
+		    b.order_createdate,b.order_state
+		from zs_bk_cancel_order a
+		left join zs_bk_order_info b on a.order_no = b.order_no
+		where a.order_no=#{orderNo}    
+	</select>
+	
+	
+	
+</mapper>

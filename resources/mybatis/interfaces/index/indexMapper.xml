@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="indexMapper">
+	 
+	 
+	<!-- 查询商铺推荐信息 -->
+	<select id="getLngAndLatNUMShopInfo" parameterType="pd" resultType="pd">
+<!--     select sid,shop_name,shop_grade,shop_img,shop_consume,shop_type,shop_street,llnum from(
+			select x.sid,x.shop_name,x.shop_grade,(left(x.shop_images,LOCATE(',', x.shop_images)-1)) shop_img,x.shop_consume, 
+			(SELECT y.st_name from  zs_bk_shop_type_info y where y.stid=x.shop_type)shop_type,x.shop_street,(
+			round(6378.138*2*asin(sqrt(pow(sin(
+			(x.shop_latitude*pi()/180-#{lat}*pi()/180)/2),2)+cos(x.shop_latitude*pi()/180)*cos(#{lat}*pi()/180)*
+			pow(sin( (x.shop_longitude*pi()/180-#{lng}*pi()/180)/2),2)))*1000) 
+			) llnum
+		    from zs_bk_shop_info  x )xx
+    where llnum <![CDATA[<=]]>500 -->
+    select sid,shop_name,follow_count,shop_grade,shop_img,shop_consume,shop_type,shop_street,llnum , if(uid,1,0) isuf   from(
+           select x.sid, count(y.uf_sid) follow_count,  x.shop_name,x.shop_grade, SUBSTRING(x.shop_images,1, IF( LOCATE(',',x.shop_images)-1=-1,CHAR_LENGTH(x.shop_images),LOCATE(',',x.shop_images)-1 ) ) shop_img,x.shop_consume, (
+		   SELECT y.st_name from zs_bk_shop_type_info y where y.stid=x.shop_type)shop_type,x.shop_street,( 
+		    round(6378.138*2*asin(sqrt(pow(sin( 
+		    (x.shop_latitude*pi()/180-#{lat}*pi()/180)/2),2)+cos(x.shop_latitude*pi()/180)*cos(#{lat}*pi()/180)*
+		     pow(sin( (x.shop_longitude*pi()/180-#{lng}*pi()/180)/2),2)))*1000) ) llnum,y.uf_id  uid  from zs_bk_shop_info x LEFT JOIN
+		zs_bk_user_follow_info y on (x.sid=y.uf_sid 
+		   <if test="userId !=null and userId !=''">
+		   	 and y.uf_userId=#{userId}
+		   </if>
+		 
+		   ) LEFT JOIN zs_bk_goods_info z on (x.sid=z.goods_sid)   where x.shop_ISshelves=1
+		   
+		   <if test="isr !=null and isr!=''">
+		   	  and x.shop_ISrecommend=1
+		   </if>
+		   <if test="shop_type !=null and shop_type !=''">
+		   	 and x.shop_type=#{shop_type}
+		   </if>
+		   <if test="street !=null and street !=''">
+		   	 and (x.shop_street=#{street} or x.shop_city=#{street})
+		   </if>
+		   <if test="city !=null and city !=''">
+		   	 and x.shop_city=#{city}
+		   </if>
+		   
+		   <if test="condition !=null and condition !=''">
+		   	 and (x.shop_name like concat('%',#{condition},'%')  or z.goods_name like  concat('%',#{condition},'%'))
+		   </if>
+		   <if test="dateDesc != null  and  dateDesc !=''">
+		   		order by  shop_createdate desc
+		   </if>
+		   group by   x.sid
+		 )xx  
+		   <if test="sort != null  and  sort !=''">
+		   		<if test="sort==2">
+		        	order by  follow_count desc
+			    </if>
+			   <if test="sort==0">
+			        order by  llnum asc
+			   </if>
+			    <if test="sort==1">
+			        order by  llnum asc
+			   </if>
+		   </if>
+		   
+		   limit #{num},#{everypage}
+	</select>
+	
+	<select id="findnewShopInfoList"  parameterType="pd" resultType="pd">
+	
+		select sid,shop_name,follow_count,shop_grade,shop_img,shop_consume,shop_type,shop_street, if(uid,1,0) isuf   from(
+           select x.sid, count(y.uf_sid) follow_count,  x.shop_name,x.shop_grade,SUBSTRING(x.shop_images,1, IF( LOCATE(',',x.shop_images)-1=-1,CHAR_LENGTH(x.shop_images),LOCATE(',',x.shop_images)-1 ) ) shop_img,x.shop_consume, (
+		   SELECT y.st_name from zs_bk_shop_type_info y where y.stid=x.shop_type)shop_type,x.shop_street ,y.uf_id  uid  from zs_bk_shop_info x LEFT JOIN
+		zs_bk_user_follow_info y on (x.sid=y.uf_sid 
+		    <choose>
+		    	<when test="userId !=null and userId !=''">
+		   				 and y.uf_userId=#{userId}
+		    	</when>
+		    	<otherwise>
+		    		 and y.uf_userId=''
+		    	</otherwise>
+		    </choose>
+		   ) LEFT JOIN zs_bk_goods_info z on (x.sid=z.goods_sid)   where  x.shop_ISshelves=1
+		   <if test="shop_type !=null and shop_type !=''">
+		   	 and x.shop_type=#{shop_type}
+		   </if>
+		   <if test="street !=null and street!=''">
+		   	 and x.shop_street=#{street}
+		   </if>
+		   <if test="city !=null and city !=''">
+		   	 and x.shop_city=#{city}
+		   </if>
+		   <if test="condition !=null and condition !=''">
+		   	 and (x.shop_name like concat('%',#{condition},'%')  or z.goods_name like  concat('%',#{condition},'%'))
+		   </if>
+		    group by   x.sid
+		    <if test="dateDesc != null  and  dateDesc !=''">
+		   		order by  shop_createdate desc
+		   </if>
+		 )xx 
+		   <if test="sort != null  and  sort !=''">
+		   		<if test="sort==2">
+		        	order by  follow_count desc
+			    </if>
+			   <if test="sort==1">
+			        order by  llnum asc
+			   </if>
+			    <if test="sort==0">
+			        order by  llnum asc
+			   </if>
+		   </if>
+		   
+		   limit #{num},#{everypage}
+	</select>
+	
+	
+	<!-- 查询中间广告信息 -->
+	<select id="findBannerC"   resultType="pd">
+		select x.baid,x.banner_image,x.banner_detail,x.banner_url,x.banner_search,x.search_type from zs_bk_banner_info x  
+			where x.banner_type=0 order by  x.banner_createdate desc  limit 0,1
+	</select>
+	
+	<!-- 查询商铺类型 -->
+	<select id="findShoptypeList" resultType="pd">
+		 select x.stid,x.st_img,x.st_name from zs_bk_shop_type_info x 
+	</select>
+	
+	<!-- 首页轮播图 -->
+	<select id="findBannerList" resultType="pd">
+		select x.baid,x.banner_image,x.banner_detail,x.banner_url,x.model_id ,x.banner_order,x.banner_content_img,x.banner_search,x.search_type  from zs_bk_banner_info x  
+			where x.banner_type=1 order by  x.banner_order asc
+	</select>
+	
+	
+	<!-- 好吃,好玩列表 -->
+	<select id="findindexYummyAndAmusinglistPage" parameterType="page" resultType="pd">
+		select x.gid,x.goods_moeny,y.shop_grade, x.goods_name,SUBSTRING(x.goods_images,1, IF( LOCATE(',',x.goods_images)-1=-1,CHAR_LENGTH(x.goods_images),LOCATE(',',x.goods_images)-1 ) ) goods_image,y.shop_street , y.shop_name shop_adders,y.sid,count(z.uf_sid) follow_count  from 
+			zs_bk_goods_info x LEFT JOIN  zs_bk_shop_info y on(x.goods_sid=y.sid)
+			LEFT JOIN zs_bk_user_follow_info z on (y.sid=z.uf_sid) LEFT JOIN zs_bk_shop_type_info t  on(y.shop_type=t.stid )
+			where x.goods_ISrecommend=1 and  y.shop_ISshelves=1  and t.type=#{pd.type} 
+			 <if test="pd.city !=null and pd.city !=''">
+		   	 and y.shop_city=#{pd.city}
+		    </if>
+			GROUP BY x.gid,x.goods_moeny,x.goods_images,y.shop_street ,y.sid
+			ORDER BY count(z.uf_sid) desc 
+	</select>
+	
+	
+	<!-- 商铺类型 -->
+	<select id="findlistshoptype" resultType="pd">
+		select x.stid,x.st_name from zs_bk_shop_type_info x
+	</select> 
+	
+	<!-- 当前城市下面的区 -->
+	<select id="findCity_Allarea" resultType="pd" parameterType="pd">
+		select y.id,y.areaID, y.area from  base_provincecityarea  y LEFT JOIN  hat_city  z  on (y.father=z.cityID)
+		where z.city=#{city}
+	</select>
+	
+		<!--区下面的商圈 -->
+	<select id="findArea_Allstreet" resultType="pd" parameterType="pd">
+		select x.street,x.streetID from  hat_street x left  join  base_provincecityarea y on(x.father=y.areaID)
+		where (y.areaID=#{areaId} or y.area=#{areaId} );
+	</select>
+</mapper>

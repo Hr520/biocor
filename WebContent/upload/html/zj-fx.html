@@ -1,0 +1,120 @@
+<!Doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=no">
+<title>中奖分享</title>
+<link rel="stylesheet" type="text/css" href="css/swiper.min.css">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<script src="js/jquery.min.js"></script>
+<script src="js/swiper.min.js"></script>
+<script type="text/javascript">
+	$(function() {
+		var url = GetRequest();
+		$
+				.ajax({
+					type : "POST",
+					url : "/interface/shoporder/getRewardInfoH5",
+					dataType : 'json',
+					cache : false,
+					success : function(data) {
+
+						if (data.state == "0") {
+							var name = "";
+							var money = "";
+							tr = "<div class=\"swiper-slide\"><table class=\"jl-table\">";
+							var len = data.data.length;
+							for (var i = 0; i < len; i++) {
+								name = data.data[i].uname;
+								money = data.data[i].money;
+								if (i % 4 == 0 && i != 0) {
+									tr = tr
+											+ "</table></div>"
+											+ "<div class=\"swiper-slide\"><table class=\"jl-table\">"
+											+ "<tr>" + "<td>恭喜用户</td>"
+											+ "<td class='em'>" + name
+											+ "</td>" + "<td>获得奖励<span>"
+											+ money + "</span>元</td>" + "</tr>";
+								} else {
+									tr = tr + "<tr>" + "<td>恭喜用户</td>"
+											+ "<td class='em'>" + name
+											+ "</td>" + "<td>获得奖励<span>"
+											+ money + "</span>元</td>" + "</tr>";
+								}
+
+							}
+							;
+							tr = tr + "</table></div>";
+							$("#trww").html(tr);
+							var mySwiper = new Swiper('.swiper-container', {
+								direction : 'vertical',
+								loop : true,
+								autoplay : 5000
+							//可选选项，自动滑动
+							})
+						}
+					}
+				});
+	});
+
+	function GetRequest() {
+		var url = location.search; //获取url中"?"符后的字串 
+		var theRequest = new Object();
+		if (url.indexOf("?") != -1) {
+			var str = url.substr(1);
+			strs = str.split("&");
+			for (var i = 0; i < strs.length; i++) {
+				theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+			}
+		}
+		return theRequest;
+	}
+
+	function down() {
+			location.href="http://a.app.qq.com/o/simple.jsp?pkgname=com.zoesap.baike";
+	}
+</script>
+
+</head>
+<body style="background: #fff1d7;">
+	<div class="wrapper">
+		<img src="images/zj-head.png" class="all-img">
+		<div class="wrap">
+			<div class="jl-title">Hey!我在“山莓”吃饭消费获得奖励</div>
+			<img src="images/zj-content.png" class="all-img">
+			<div class="jl-ad">
+				用山莓吃饭消费任意金额就可获得<br>与消费账单金额相等的现金奖励机会
+			</div>
+			<div class="jl-rel">
+				<div class="jl-left">
+					<img src="images/l-line.png" class="all-img">
+				</div>
+				<div class="jl-mid">一款吃饭消费、获得奖励的APP</div>
+				<div class="jl-right">
+					<img src="images/r-line.png" class="all-img">
+				</div>
+			</div>
+		</div>
+		<section class="jl-bg">
+			<div class="wrap">
+				<div class="tg-title tg-title1">山莓用户奖励数据</div>
+			</div>
+		</section>
+		<section>
+			<div class="wrap mb60">
+				<div class="swiper-container" style="height: 120px; z-index: 0">
+					<div class="swiper-wrapper" id="trww"></div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<footer class="footer">
+		<div class="jl-btn">
+			<a href="javascript:void(0)" onclick="down()" class="r-btn block">下载山莓APP</a>
+		</div>
+
+	</footer>
+</body>
+</html>

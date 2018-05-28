@@ -1,0 +1,210 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>健康测试</title>
+    <link rel="stylesheet" type="text/css" href="css/swiper.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/swiper.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/icheck.min.js"></script>
+    <script type="text/javascript">
+    	var qlist;
+    	var result={};
+    	var userid;
+    	$(function(){
+    		userid = getUrlParam("userid");
+    		getQList();
+    	});
+    	function getQList(){
+    		$.ajax({
+    			type : "POST",
+    			url : "/interface/find/questionList",
+    			data : {},
+    			dataType :　"json",
+    			success : function(data){
+    				qlist = data;
+    				$("#acount").text(qlist.count);
+    	    		if(qlist.count==1){
+    					//$(".btn-div ul li:nth-child(2)").css("opacity","1");
+    	    			$("#next").hide();
+    	    			$("#tj").show();
+    	    		}
+    				changeTxt(0);
+    			}
+    		});
+    	}
+    	function changeTxt(id){
+    		$("#qno").text(id+1);
+    		$("#q_qname").html(qlist.qlist[id].q_qname);
+			//$("#q_qname").html(qlist.qlist[0].alist[0].qa_content);
+			var answerHtml = "";
+			$.each(qlist.qlist[id].alist,function(index,answer){
+				answerHtml+= "<label for='ch"+(index+1)+"'><li>"
+                		  +"<input type='radio' id='ch"+(index+1)+"' name='ck1' value='"+index+"' data-required='true' onclick='changeN()'>"
+                          +"<span>"+(index+1)+"、"+answer['qa_content']+"</span></li></label>";
+			});
+			$("#answer").html(answerHtml);
+			changeStyle();
+    	}
+    	function next(){
+    		var an = $('#answer input[name="ck1"]:checked ').val();
+    		if(an=="" || an==undefined ){
+    			return;
+    		}else{
+    			var qno = parseInt($("#qno").text());
+    			var qnoz = qno + 1;
+        		if(qno<qlist.count){
+        			result[qno]=an;
+        			changeTxt(qno);
+        			$("input[name='ck1']").get(result[qnoz]).checked=true;
+        			changeStyle();
+        			var curV = $('#answer input[name="ck1"]:checked ').val();
+        			if(qno==qlist.count-1){
+        				$("#next").hide();
+        				$("#tj").show();
+        				if(curV=="" || curV==undefined){
+        					$("#tj").css("opacity","0.5");
+        				}else{
+        					$("#tj").css("opacity","1");
+        				}
+        			}else{
+        				if(curV=="" || curV==undefined){
+        					$("#next").css("opacity","0.5");
+        				}else{
+        					$("#next").css("opacity","1");
+        				}
+        			}
+        			$("#last").css("opacity","1");
+        		}
+    		}
+    	}
+    	function last(){
+    		var qno = parseInt($("#qno").text()-2);
+    		var qnoz = qno + 1;
+    		if(qno>=0){
+    			changeTxt(qno);
+    			$("input[name='ck1']").get(result[qnoz]).checked=true;
+    			changeStyle();
+    			if(qno<=0){
+    				$("#last").css("opacity","0");
+    			}else{
+    				$("#last").css("opacity","1");
+    			}
+    			$("#tj").hide();
+    			$("#next").show();
+    			$("#next").css("opacity","1");
+    		}
+    	}
+    	function changeStyle(){
+    		$('input').iCheck({
+		        checkboxClass: 'icheckbox_minimal',
+		        radioClass: 'iradio_minimal',
+		        increaseArea: '20%' // optional
+		    });
+    	}
+    	function changeN(){
+    		var qno = parseInt($("#qno").text());
+    		$(".btn-div ul li:nth-child(2)").css("opacity","1");
+    		if(qno==qlist.count){
+    			$("#tj").css("opacity","1");
+    		}
+    	}
+	    //提交
+	    function save(){
+	    	var an = $('#answer input[name="ck1"]:checked ').val();
+    		if(an=="" || an==undefined ){
+    			return;
+    		}else{
+    			var qno = parseInt($("#qno").text());
+    			result[qno]=an;
+    			var str="";
+    			$.each(result,function(key,values){  
+    			    str +=values+","
+    			 });
+    			str = str.substring(0,str.length-1);
+	    		location.href="/interface/find/addUserQuestionTest?userid="+userid+"&str="+str;
+    		}
+	    }
+	    /**
+    	截取url中的参数
+    	*/
+    	function getUrlParam(name)
+    	{
+	    	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+	    	var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+	    	if (r!=null) return unescape(r[2]); return null; //返回参数值
+    	}
+    </script>
+</head>
+<body>
+<div class="wrapper">
+    <div class="main ">
+        <div class="wrap">
+            <form action="" >
+                <section>
+                    <div class="question"><em><span id="qno">1</span>/<span id="acount"></span></em><span id="q_qname"></span></div>
+                    <div class="checkbox">
+                        <ul class="cs-ul" id="answer">
+                            
+                        </ul>
+                    </div>
+                </section>
+                <div class="btn-div">
+                    <ul>
+                        <!-- <li><a href="javascript:history.go(-1)">上一题</a></li>
+                        <li><a href="food-res.html"> 下一题 </a></li> -->
+                        <li id="last" class="hide"><a href="javascript:void(0);" onclick="last()">上一题</a></li>
+                        <li id="next" style="opacity:0.5"><a href="javascript:void(0);" onclick="next()"> 下一题 </a></li>
+                        <li id="tj" style="display:none;opacity:0.5"><a href="javascript:void(0);" onclick="save()"> 提交 </a></li>
+                    </ul>
+
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<script>
+/*
+    $(function(){
+        var init = function(){
+            var val = $('input:radio:checked').val();
+            if(val){
+                $(".btn-div ul li:nth-child(2)").css("opacity","1");
+            }
+        };
+        init();
+
+        $("input").click(function() {
+            $(".btn-div ul li:nth-child(2)").css("opacity","1");
+            $(".btn-div ul li").click(function(){
+                var val = $('input[type="radio"]:checked').val();
+                var result = $.parseJSON( sessionStorage.result );
+                result[2] = val;
+                sessionStorage.result = JSON.stringify(result);
+                window.location.href="food-test1.html";
+            })
+        });
+
+        var submit = function(result){
+            var url = '';//接口地址，接受所有题目的结果
+            $.post(url,result, function(data){
+                alert('提交完成！');
+            });
+        }
+
+    });
+    $('input').iCheck({
+        checkboxClass: 'icheckbox_minimal',
+        radioClass: 'iradio_minimal',
+        increaseArea: '20%' // optional
+    });
+    $('.label_radio:eq(0) input').on('ifChecked', function(event) {
+    });
+    */
+</script>
+</body>
+</html>

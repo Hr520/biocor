@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="integralByEndMapper">
+	<!-- 查询所有加速卡 -->
+	<select id="getSpeedCardlistPage" parameterType="page" resultType="pd">
+		select scid,sc_speedc_name,sc_speedc_integral,sc_speedc_rate,sc_speedc_date,
+		sc_beggrade,sc_endgrade
+		from zs_bk_speed_card
+		where sc_state = 1
+		order by sc_speedc_date desc
+	</select>
+	<!-- 根据id查询加速卡信息 -->
+	<select id="getSpeedCardInfo" parameterType="pd" resultType="pd">
+		select scid,sc_speedc_name,sc_speedc_integral,sc_speedc_rate,sc_speedc_date,
+		sc_beggrade,sc_endgrade
+		from zs_bk_speed_card where scid = #{scid}
+	</select>
+	<!-- 新增加速卡 -->
+	<insert id="addSpeedCard" parameterType="pd">
+		insert into zs_bk_speed_card (
+		<if test="sc_speedc_name!=null and sc_speedc_name!=''">
+		sc_speedc_name,
+		</if>
+		sc_speedc_integral,sc_speedc_rate,
+		sc_speedc_date,sc_beggrade,sc_endgrade) 
+		values (
+		<if test="sc_speedc_name!=null and sc_speedc_name!=''">
+		#{sc_speedc_name},
+		</if>
+		#{sc_speedc_integral},#{sc_speedc_rate},
+		now(),#{sc_beggrade},#{sc_endgrade})
+	</insert>
+	<!-- 修改加速卡 -->
+	<update id="editSpeedCard" parameterType="pd">
+		update zs_bk_speed_card set 
+		<if test="sc_speedc_name!=null and sc_speedc_name!=''">
+		sc_speedc_name = #{sc_speedc_name}
+		</if>
+		<if test="sc_speedc_integral!=null and sc_speedc_integral!=''">
+		,sc_speedc_integral = #{sc_speedc_integral}
+		</if>
+		<if test="sc_speedc_rate!=null and sc_speedc_rate!=''">
+		,sc_speedc_rate = #{sc_speedc_rate}
+		</if>
+		<if test="sc_beggrade!=null and sc_beggrade!=''">
+		,sc_beggrade = #{sc_beggrade}
+		</if>
+		<if test="sc_endgrade!=null and sc_endgrade!=''">
+		,sc_endgrade = #{sc_endgrade}
+		</if>
+		where scid = #{scid}
+	</update>
+	<!-- 删除加速卡 -->
+	<update id="delSpeedCard" parameterType="pd">
+		update zs_bk_speed_card set sc_state = 0 where scid = #{scid}
+	</update>
+</mapper>

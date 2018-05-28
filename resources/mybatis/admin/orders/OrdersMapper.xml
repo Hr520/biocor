@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ordersMapper">
+
+	<!-- 查询订单列表 -->
+	<select id="findOrderslistPage" parameterType="pd" resultType="pd"
+		useCache="false">
+		select a.order_no,a.order_date,a.order_money,a.order_type,
+		a.order_pay_state,a.order_pay_date,a.order_pay_type,
+		a.order_userId,a.order_sid,a.order_confirm_state,a.order_state,
+		a.order_qcode,a.order_createdate,a.order_shopName,a.order_repast_date,
+		c.user_name
+
+		from zs_bk_order_info a
+		left join zs_bk_shop_info b on a.order_sid = b.sid
+		left join zs_bk_user_info c on a.order_userId = c.userid
+		where 1=1
+		<if test="pd.orderNo != null">
+			and a.order_no like '%${pd.orderNo}%'
+		</if>
+		<if test="pd.type != 1">
+			and b.user_id = #{pd.userid}
+		</if>
+		<if test="pd.orderstate!=null and pd.orderstate!=''">
+			and a.order_state=#{pd.orderstate}
+		</if>
+		order by a.order_createdate desc
+	</select>
+
+
+
+	<!-- 通过订单ID查询订单信息 -->
+	<select id="findOrdersInfo" parameterType="pd" resultType="pd"
+		useCache="false">
+		select a.order_no,a.order_date,a.order_money,a.order_type,
+		a.order_pay_state,a.order_pay_date,a.order_pay_type,
+		a.order_userId,a.order_sid,a.order_confirm_state,a.order_state,
+		a.order_qcode,a.order_createdate,a.order_shopName,a.order_repast_date,
+		c.user_name,
+		d.ub_remark
+		from zs_bk_order_info a
+		left join zs_bk_shop_info b on a.order_sid = b.sid
+		left join zs_bk_user_info c on a.order_userId = c.userid
+		left join zs_bk_user_bespeak_info d on a.order_no = d.ub_order_no
+		where 1=1 and
+		a.order_no=#{orderNo}
+
+	</select>
+
+
+	<!-- 更新订单状态 -->
+	<update id="updateOrdersState" parameterType="pd">
+		update zs_bk_order_info set order_state = 2 , order_confirm_state = 1,order_commit_time = now()
+		where order_no = #{order_no}
+	</update>
+
+	<!-- 查询订单所有商品 -->
+	<select id="findOrdersGoods" parameterType="pd" resultType="pd"
+		useCache="false">
+		SELECT a.od_oNO,a.od_goodsId,a.od_goodsName,a.od_goodsNum,
+		a.od_goods_Pmoeny,a.od_goods_Smoeny
+		FROM zs_bk_order_detail_info a
+		WHERE a.od_oNo = #{orderNo}
+
+	</select>
+
+	<!-- ********************************订单退订*********************************** -->
+
+	<!-- 查询订单退订列表 -->
+	<select id="findOrderBacklistPage" parameterType="pd"
+		resultType="pd" useCache="false">
+		select
+		x.tu_id,x.cancel_no,x.cancel_time,x.cancel_moeny,x.cancel_state,x.cancel_userid,d.user_name
+		as name,
+		a.order_no,a.order_date,a.order_money,a.order_type,
+		a.order_pay_state,a.order_pay_date,a.order_pay_type,
+		a.order_userId,a.order_sid,a.order_confirm_state,a.order_state,
+		a.order_qcode,a.order_createdate,a.order_shopName,a.order_repast_date,
+		c.user_name
+
+		from zs_bk_cancel_order x
+		left join zs_bk_order_info a on x.order_no = a.order_no
+		left join
+		zs_bk_shop_info b on a.order_sid = b.sid
+		left join zs_bk_user_info c on
+		a.order_userId = c.userid
+		left join zs_bk_user_info d on
+		x.cancel_userid = d.userid
+		where 1=1
+		<if test="pd.orderNo != null">
+			and a.order_no like '%${pd.orderNo}%'
+		</if>
+		<if test="pd.type != 1">
+			and b.user_id = #{pd.userid}
+		</if>
+	
+		order by a.order_createdate desc
+	</select>
+
+	<!-- 根据退订ID查询退订订单详情 -->
+	<select id="findOrdersReturnInfo" parameterType="pd" resultType="pd"
+		useCache="false">
+		select
+		x.tu_id,x.cancel_no,x.order_no,x.cancel_time,x.cancel_moeny,x.cancel_state,
+		x.cancel_userid,x.cancel_type
+		from zs_bk_cancel_order x
+		where x.tu_id=#{tuid}
+	</select>
+
+	<!-- 更新订单状态 -->
+	<update id="updateOrderState" parameterType="pd">
+		update zs_bk_order_info set order_state = #{state} where order_no=#{orderNo}
+	</update>
+
+	<!-- 更新用户余额 -->
+	<update id="updateUserMoney" parameterType="pd">
+		update zs_bk_user_info set user_money = user_money + #{money} where userid = #{userid}
+	</update>
+
+	<!-- 退款申请状态修改 -->
+	<update id="updateReturnState" parameterType="pd">
+		update zs_bk_cancel_order set cancel_state = #{state},cancel_time= now()
+		where tu_id=#{tuid}
+	</update>
+
+
+
+	<!-- 奖金池金额减少 -->
+	<update id="updatePrizePool" parameterType="pd">
+		update zs_bk_prizepool_info set bp_money = bp_money - #{money} ,
+		bp_profit = bp_profit - #{profit} , bp_distributable = #{bp_distributable}
+		where bpid=#{bpid}
+	</update>
+	<!-- 根据订单号 -->
+	<select id="getOrder_money" parameterType="pd" resultType="pd">
+		SELECT
+	b.cancel_moeny AS order_money,
+	a.order_sid,
+	a.order_getIntegral,
+	a.order_Growth
+    FROM
+	zs_bk_order_info AS a 
+    LEFT JOIN zs_bk_cancel_order AS b ON a.order_no=b.order_no
+    WHERE
+	a.order_no =#{orderNo}
+	</select>
+	<!--取消订单 插入用户钱包明细表 -->
+	<insert id="insertuserwithdraw_info" parameterType="pd">
+		insert into
+		zs_bk_user_withdraw_info(uwid,uw_userId,uw_createdate,uw_type,uw_money)values(null,#{uw_userId},now(),#{uw_type},#{uw_money})
+	</insert>
+	<!-- 通过订单id查询订单详情和积分相关 -->
+	<select id="getOrderMoneyAndscoreInfo" parameterType="pd" resultType="pd">
+		select order_userId as order_userId,order_sid as shop_id,order_money as order_money,order_getIntegral,order_Growth  from zs_bk_order_info where order_no=#{order_no}
+	</select>
+</mapper>

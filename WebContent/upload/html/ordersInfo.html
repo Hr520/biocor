@@ -1,0 +1,258 @@
+<!Doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="format-detection" content="telephone = no" />
+<title>订单详情</title>
+<link rel="stylesheet" type="text/css"
+	href="css/jquery.easy-pie-chart.css">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<link rel="stylesheet" type="text/css" href="css/orders.css">
+<script src="js/jquery.min.js"></script>
+
+<script src="js/jquery.easy-pie-chart.js"></script>
+<script type="text/javascript">
+	$(function() {
+		var url = GetRequest();
+		var id1 = url.order_no
+		$
+				.ajax({
+					type : "POST",
+					url : '/interface/shoporder/getOrderInfo?order_no='
+							+ id1,
+					dataType : 'json',
+					cache : false,
+					success : function(data) {
+						if ("0" == data.state) {
+							var ub_remark=data.data.ub_remark;
+							var order_date = data.data.order_date;
+							var order_no = data.data.order_no;
+							var order_type = data.data.order_type;
+							var order_money = data.data.order_money;
+							var order_pay_state = data.data.order_pay_state;
+							var ub_bespeakdate = data.data.ub_bespeakdate;
+							var ub_dinersNum = data.data.ub_dinersNum;
+							var ub_ISroom = data.data.ub_ISroom;
+							var ub_userName = data.data.ub_userName;
+							var ub_userTel = data.data.ub_userTel;
+							var order_confirm_state = data.data.order_confirm_state;
+							var order_qcode = data.data.order_qcode;
+							var order_state = data.data.order_state;
+							var list = data.data.list;
+							var od_goods_Pmoeny = "";
+							var od_goodsNum = "";
+							var od_goodsName = "";
+							var od_goodsId = "";
+							var od_goods_Smoeny = "";
+							var tr = "";
+							for (var i = 0; i < list.length; i++) {
+								od_goods_Pmoeny = list[i].od_goods_Pmoeny;
+								od_goodsNum = list[i].od_goodsNum;
+								od_goodsName = list[i].od_goodsName;
+								od_goodsId = list[i].od_goodsId;
+								od_goods_Smoeny = list[i].od_goods_Smoeny;
+								tr += "<tr><td>" + list[i].od_goodsName
+										+ "</td><td>￥<span>"
+										+ list[i].od_goods_Pmoeny
+										+ "</span>/份</td><td><span>"
+										+ list[i].od_goodsNum
+										+ "</span></td><td>￥<span>"
+										+ list[i].od_goods_Smoeny
+										+ "</span></td></tr>";
+							}
+							$("#ub_remark").html(ub_remark);
+							$("#order_state").html(order_state);
+							$("#heand").append(heand);
+							$("#tr").append(tr);
+							$("#od_goods_Pmoeny").html(od_goods_Pmoeny);
+							$("#od_goodsNum").html(od_goodsNum);
+							$("#od_goodsName").html(od_goodsName);
+							$("#od_goodsId").html(od_goodsId);
+							$("#od_goods_Smoeny").html(od_goods_Smoeny);
+							var shop_name = data.data.shop_name;
+							var shop_images = data.data.shop_images
+							 var imgs =shop_images;
+							
+
+							$("#order_no").html(data.data.order_no);
+							$("#order_type").html(data.data.order_type);
+							$("#order_money").html(data.data.order_money);
+							$("#order_qcode").html(order_qcode);
+							$("#order_pay_state").html(
+									data.data.order_pay_state);
+							$("#ub_bespeakdate").html(data.data.ub_bespeakdate);
+							$("#ub_dinersNum").html(data.data.ub_dinersNum);
+							$("#ub_ISroom").html(data.data.ub_ISroom);
+							$("#ub_userName").html(data.data.ub_userName);
+							$("#ub_userTel").html(data.data.ub_userTel);
+							$("#order_confirm_state").html(
+									data.data.order_confirm_state);
+							$("#od_goods_Pmoeny").html(od_goods_Pmoeny);
+							$("#od_goodsNum").html(od_goodsNum);
+							$("#od_goodsName").html(od_goodsName);
+							$("#od_goodsId").html(od_goodsId);
+							$("#od_goods_Smoeny").html(od_goods_Smoeny);
+							$("#order_date").html(data.data.order_date);
+							$("#shop_name").html(data.data.shop_name);
+							$("#imgs").attr("src","/"+imgs);
+							var heand = "";
+							if (order_state == 0) {
+								//未付款
+								heand += "<div class='orders-top'>"
+										+ "<img src='images/gt-icon.png' class='gt-icon'>"
+										+ "<h3>未支付</h3></div>"
+										+ "<div class='orders-div'>"
+										+ "还需支付<span>￥" + order_money
+										+ "</span></div>"
+							} else if (order_state == 1) {
+								/*未消费  */
+								heand += "<div class='wrap ptb5'>"
+										+ "<div class='orders-left'>"
+										+ " <img src='images/dd-icon.png' class='orders-img'></div>"
+										+ "<div class='orders-mid'>"
+										+ "<div class='o-state'>订单未消费</div>"
+										+ "<div class='o-des'>你可以把此订单分享给朋友来消费</div></div>"
+										+ "<div class='orders-right'>"
+										+ "<div class='chart'>"
+										+ "<div class='percentage' data-percent='50'></div>"
+										+ "<div class='per-box'></div>"
+										+ "</div></div>"
+										+ "<div class='o-content'>"
+										+ "<div class='o-number'>订单号："
+										+ order_no
+										+ "</div>"
+										+ "<img class='o-ewm' src=\""+"/"+order_qcode+"\"></div>"
+										+ "</div>"
+							} else if( order_state == 2){
+								/*  已消费*/
+								heand += "<div class='wrap ptb5'>"
+										+ "<div class='orders-left'>"
+										+ "<img src='images/dd-icon.png' class='orders-img'></div>"
+										+ "<div class='orders-mid'>"
+										+ "<div class='o-state'>订单已消费</div>"
+										+ "<div class='o-des'>任何意见和吐槽，都欢迎联系我们</div></div>"
+										+ "<div class='orders-right'>"
+										+ "<div class='chart'>"
+										+ "<div class='percentage' data-percent='100'></div>"
+										+ "<div class='per-box'>"
+										+ "</div></div></div></div>"
+							} else if( order_state == 4){
+								/*订单退款中  */
+								heand += "<div class='wrap ptb5'>"
+									+ "<div class='orders-left'>"
+									+ "<img src='images/dd-icon.png' class='orders-img'></div>"
+									+ "<div class='orders-mid'>"
+									+ "<div class='o-state'>订单退款中</div>"
+									+ "<div class='o-des'>任何意见和吐槽，都欢迎联系我们</div></div>"
+									+ "<div class='orders-right'>"
+									+ "<div class='chart'>"
+									+ "<div class='percentage' data-percent='100'></div>"
+									+ "<div class='per-box'>"
+									+ "</div></div></div></div>"
+							}else if( order_state == 5){
+								/*订单退款完成  */
+								heand += "<div class='wrap ptb5'>"
+									+ "<div class='orders-left'>"
+									+ "<img src='images/dd-icon.png' class='orders-img'></div>"
+									+ "<div class='orders-mid'>"
+									+ "<div class='o-state'>订单退款完成</div>"
+									+ "<div class='o-des'>任何意见和吐槽，都欢迎联系我们</div></div>"
+									+ "<div class='orders-right'>"
+									+ "<div class='chart'>"
+									+ "<div class='percentage' data-percent='100'></div>"
+									+ "<div class='per-box'>"
+									+ "</div></div></div></div>"
+							}
+							
+							$("#heand").append(heand);
+						}
+					}
+				});
+
+	});
+
+	function GetRequest() {
+		var url = location.search; //获取url中"?"符后的字串 
+		var theRequest = new Object();
+		if (url.indexOf("?") != -1) {
+			var str = url.substr(1);
+			strs = str.split("&");
+			for (var i = 0; i < strs.length; i++) {
+				theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+			}
+		}
+		return theRequest;
+	}
+</script>
+
+</head>
+<body style="background: #f5f5f5;">
+	<div class="wrapper">
+		<div class="main ">
+			<section class="s1 mt5" id="heand"></section>
+			<div class="orders-box">
+				<div class="orders-list">订单明细</div>
+				<section class="s1">
+					<div class="wrap">
+						<div class="clearfix">
+							<div class="o-left">
+								<img src="images/list-pic.png" id="imgs">
+							</div>
+							<div class="o-right">
+								<span id="shop_name"></span>
+							</div>
+						</div>
+						<table class="o-table" id="tr">
+							<tr>
+								<td>菜品名称</td>
+								<td>单价</td>
+								<td>数量</td>
+								<td>小计</td>
+							</tr>
+						</table>
+						<div class="zj">
+							总计：<span id="order_money"></span>
+						</div>
+					</div>
+
+				</section>
+			</div>
+			<div class="orders-box">
+				<div class="orders-list">其它信息</div>
+				<section class="s1">
+					<div class="wrap">
+						<ul class="o-ul">
+							<li><span>下单时间：</span><em id="order_date"></em></li>
+							<li><span>订单类型：</span><em id="order_type"></em></li>
+							<li><span>预定时间：</span><em id="ub_bespeakdate"></em></li>
+							<li><span>就餐人数：</span><em id="ub_dinersNum"></em><em style="color: #999;">人</em></li>
+							<li><span>包&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;房：</span><em
+								id="ub_ISroom"></em></li>
+							<li><span>联&nbsp;系&nbsp;&nbsp;人：</span><em id="ub_userName"></em></li>
+							<li><span>联系电话：</span><em id="ub_userTel"></em></li>
+							<li><span>备&nbsp;&nbsp;注：</span><em id="ub_remark"></em></li>
+						</ul>
+					</div>
+				</section>
+			</div>
+		</div>
+	</div>
+	<script>
+		$(function() {
+			var initPieChart = function() {
+				$('.percentage').easyPieChart({
+					scaleColor : false,
+					animate : 1000,
+					size : 70,
+					lineWidth : 1,
+					barColor : "red"
+				});
+			};
+			initPieChart();
+		});
+	</script>
+</body>
+</html>

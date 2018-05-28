@@ -1,0 +1,87 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>积分帮助</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/jquery.min.js"></script>
+</head>
+<body style="background:#f5f5f5;">
+<div class="wrapper">
+    <div class="main ">
+        <section class="mem-section">
+            <div class="mem-title">
+                <img src="images/list-pic.png" class="title-pic">
+                <img src="images/vip-icon.png" class="vip-icon">
+            </div>
+            <div class="mem-name">
+                <div>彼岸、花开</div>
+                <div>我的成长值：100</div>
+            </div>
+        </section>
+        <section class="bz-section bt5">
+            <div class="select-box">
+                <div class="list-title">我的会员</div>
+                <div class="mem-progress">
+                    <div class="mem-num"><em class="em">50</em>/250</div>
+                    <div class="weui_progress">
+                        <div class="weui_progress_bar">
+                            <div class="weui_progress_inner_bar js_progress" style="width: 5%;"></div>
+                        </div>
+                    </div>
+                    <ul class="v-icon clearfix" style="width: 100%">
+                        <li><img src="images/V0.png"></li>
+                        <li><img src="images/V1.png"></li>
+                        <li><img src="images/V2.png"></li>
+                        <li><img src="images/V3.png"></li>
+                        <li><img src="images/V4.png"></li>
+                        <li><img src="images/V5.png"></li>
+                        <li class="last-li"><img src="images/V6.png"></li>
+                    </ul>
+                    <div class="mem-des" >距离下一等级还需<span>200</span>长值</div>
+                </div>
+            </div>
+        </section>
+        <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title">积分规则</div>
+                <div class="select-content">按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。</div>
+            </div>
+        </section>
+        <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title">获取来源</div>
+                <div class="select-content">按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。</div>
+            </div>
+        </section>
+        <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title">扣减规则</div>
+                <div class="select-content">按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。</div>
+            </div>
+        </section>
+        <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title no_line">积分有效期限</div>
+                <div class="select-content no_line">按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。按消费额度相应赠送一定积分，可换购指定商品并按消费额度提升会员等级。</div>
+            </div>
+        </section>
+    </div>
+</div>
+<script>
+    $(function(){
+        $(".select-title").click(function(){
+            var status = $(this).attr('status');
+            if(status == 0 || !status ){
+                $(".select-title[status=1]").attr('status', 0).css({"border-bottom":"1px solid #f2f2f2"}).removeClass("select-icon").next().slideUp();
+                $(this).attr('status', 1).addClass('select-icon').css({"border-bottom":"0"}).next().slideDown();
+            }else{
+                $(this).attr('status', 0).removeClass("select-icon").css({"border-bottom":"1px solid #f2f2f2"}).next().slideUp();
+            }
+        })
+    });
+</script>
+</body>
+</html>

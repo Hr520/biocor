@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="backShopUserMapper">
+	<!-- 商户端用户模块sql操作 -->
+
+	<!-- 查询用户提现列表 -->
+	<select id="getsaleList" parameterType="pd" resultType="pd">
+		SELECT
+		a.id,
+		a.getmoney_time,
+		a.money,
+		a.order_no,
+        a.bank_no,
+		CASE a.state WHEN 0 THEN '处理中'
+		WHEN 1 THEN
+		'成功'
+		WHEN 2 THEN '失败' ELSE '' END AS state
+		FROM
+		zs_bk_shop_applymoney AS
+		a
+		WHERE
+		a.shop_id =#{shop_id}
+		AND a.userid =#{userid}
+		limit
+		#{startrows},#{rows}
+	</select>
+	<!-- 查询菜品销量情况列表 -->
+	<!-- 查询菜品id -->
+	<select id="goodsSaleslist" parameterType="pd" resultType="pd">
+SELECT a.order_no,b.odid,b.od_goodsName,
+IFNULL(SUM(b.od_goodsNum),0)AS salesTotal ,
+IFNULL(SUM(b.od_goods_Smoeny),0)AS salesMOney ,
+IFNULL(SUBSTRING(c.goods_images,1,
+		IF(LOCATE(',',c.goods_images)-1=-1,CHAR_LENGTH(c.goods_images),LOCATE(',',c.goods_images)-1)
+		),'') as goods_images
+FROM zs_bk_order_info AS a
+LEFT JOIN zs_bk_order_detail_info AS b
+ON a.order_no=b.od_oNO
+LEFT JOIN zs_bk_goods_info AS c ON b.od_goodsId=c.gid
+WHERE a.order_sid=#{shop_id} AND a.order_state=2 AND date(a.order_commit_time)=#{datetime} GROUP BY c.gid 
+ORDER BY salesTotal DESC
+limit #{startrows},#{rows}
+
+	</select>
+	<!-- 查询店铺收支明细 -->
+	<select id="getShopMOneyInfoList" parameterType="pd" resultType="pd">
+		SELECT * FROM(
+		SELECT a.money,a.getmoney_time as datatime, a.state,0 as type FROM
+		zs_bk_shop_applymoney AS a WHERE a.shop_id=#{shop_id} AND
+		a.userid=#{userid}
+		UNION
+		SELECT a.order_money as money ,a.order_commit_time as datatime,-1,1 as type
+		FROM zs_bk_order_info AS a WHERE a.order_sid=#{shop_id} AND
+		a.order_state=2
+		)as tal
+		ORDER BY datatime desc
+		limit #{startrows},#{rows}
+	</select>
+	<!-- 查询我的收入 存储过程 -->
+	<select id="getShopMOneyInfo" parameterType="pd" resultType="pd"
+		statementType="CALLABLE">
+		{call shopMyincome(#{shop_id})}
+	</select>
+	<!-- 查询我的报表 -->
+	<select id="getShopThereport" parameterType="pd" resultType="pd">
+		SELECT ifnull(SUM(od_goodsNum),0)as
+		goodstotalnumber,ifnull(SUM(order_money),0)as moneytotalnumber FROM(
+		SELECT a.order_money,b.od_goodsNum FROM zs_bk_order_info AS a
+		LEFT JOIN zs_bk_order_detail_info AS b
+		ON a.order_no=b.od_oNO
+		WHERE a.order_sid=#{shop_id} AND a.order_state=2 AND
+		DATE(a.order_commit_time)=#{datetime}
+		GROUP BY a.order_no)AS tab
+	</select>
+	<!-- 查询订单总数 -->
+	<select id="getpeopletotal" parameterType="pd" resultType="java.lang.Integer">
+SELECT count(*) FROM zs_bk_order_info AS a WHERE a.order_state=2 AND
+		DATE(a.order_commit_time)=#{datetime} AND a.order_sid=#{shop_id}
+	</select>
+	<!-- 查询餐位费类型的人数总数 -->
+	<select id="getshopusertoatl" parameterType="pd" resultType="java.lang.Integer">
+		SELECT IFNULL(SUM(b.od_goodsNum),0) AS people FROM zs_bk_order_info AS
+		a
+		LEFT JOIN zs_bk_order_detail_info AS b
+		ON a.order_no=b.od_oNO AND b.od_goodsId=0
+		WHERE a.order_state=2 AND a.order_type=1 AND
+		DATE(a.order_commit_time)=#{datetime} AND a.order_sid=#{shop_id}
+	</select>
+	<!-- 查询店铺浏览次数 -->
+	<select id="geShopbrowseTotal" parameterType="pd" resultType="java.lang.String">
+		SELECT IFNULL(a.browsecount,0)as browsecount FROM zs_bk_shop_browse AS
+		a
+		WHERE a.shop_id=#{shop_id} AND DATE(a.datetime)=#{datetime} GROUP BY a.shop_id
+	</select>
+
+	<!-- 查询店铺余额大类 -->
+	<!-- 查询该用户是否是店主 -->
+	<select id="getISNOshopper" parameterType="pd" resultType="java.lang.Integer">
+		SELECT count(id) FROM zs_bk_shop_assistant AS a
+		WHERE a.shop_id=#{shop_id} AND a.id=#{userid} AND a.type=1
+	</select>
+	<!-- 查询店铺余额 -->
+	<select id="getShopCanwithdrawalMOney" parameterType="pd" resultType="java.lang.Double">
+	SELECT IFNULL(a.shop_money,0)shop_money  FROM zs_bk_shop_info as
+ a WHERE a.sid=#{shop_id}
+	</select>
+	
+	
+	<!-- 设置店铺的tag值推送用 -->
+	<update id="SetTagvalueShopandUser" parameterType="pd">
+	update zs_bk_shop_assistant set tag_name=#{tag_name} where id=#{userid} and shop_id=#{shop_id}
+	</update>
+	<!-- 店主设置推送消息接收 -->
+	<update id="setJPush" parameterType="pd">
+		update zs_bk_shop_info set push=#{push} where sid=#{shop_id}
+	</update> 
+	<!-- 查询用户是否提交过 -->
+	<select id="getFeedback" parameterType="pd" resultType="java.lang.Integer">
+		SELECT count(*)as count FROM zs_bk_shop_feedback  as  a where 
+      a.userid=#{userid} AND DATE(a.datetime)=CURDATE()
+	</select>
+	<!-- 用户意见反馈 -->
+	<insert id="addfeedback" parameterType="pd">
+		insert into zs_bk_shop_feedback(id,shop_id,content,userid,type,datetime)
+		values(null,#{shop_id},#{content},#{userid},#{type},now())
+	</insert>
+	<!-- 查询我的消息列表 -->
+	<select id="getshopMessagelistpage" parameterType="pd" resultType="pd">
+	SELECT a.id,a.title,a.type,a.content,
+	IFNULL(b.order_type,3)AS order_type,
+	ifnull(a.order_no,'')as  order_no,
+	a.datetime FROM zs_bk_shop_ipush_message AS a
+	LEFT JOIN zs_bk_order_info AS b ON a.order_no=b.order_no
+WHERE a.shop_id=#{shop_id} AND 
+<if test="type=='2'.toString()">
+a.sendobject=2 and (a.type=1 or a.type=2 or  a.type=3 or a.type=5)
+</if>
+<if test="type=='1'.toString()">
+ a.sendobject=1 and (a.type=1 or a.type=2 or a.type=4 or a.type=3 or a.type=5)
+</if>
+order by a.datetime desc
+limit #{startrows},#{rows}
+	</select>
+	<!-- 查询提现详情 -->
+	<select id="getwithdrawalInfo" parameterType="pd" resultType="pd">
+	SELECT a.id,a.state,a.money,a.bank_no,a.order_no FROM zs_bk_shop_applymoney AS a
+WHERE a.id=#{order_no}
+	</select>
+</mapper>

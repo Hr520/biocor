@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="printMapper">
+    <!-- 查询推荐店铺列表 -->
+	<select id="findPintInfo" parameterType="String" resultType="pd" useCache="false">
+		 select y.machine_code,y.mKey from zs_bk_order_info x LEFT JOIN zs_bk_shop_info y on (x.order_sid=y.sid)
+			where  x.order_no=#{orderNo}
+	</select>
+
+	 
+</mapper>

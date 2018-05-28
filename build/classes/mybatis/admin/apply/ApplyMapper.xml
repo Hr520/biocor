@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="applyMapper">
+
+    <!-- 查询推荐店铺列表 -->
+	<select id="findApplylistPage" parameterType="pd" resultType="pd" useCache="false">
+		select a.urr_id,a.urr_userId,a.urr_restaurant_name,a.urr_restaurant_tyepId,a.urr_error_remark,
+		    a.urr_restaurant_address,a.urr_restaurant_tel,a.urr_state,a.urr_createdate,
+		    a.urr_restaurant_longitude,a.urr_restaurant_latitude,
+		    b.user_name
+		from zs_bk_user_recommendr a 
+		left join zs_bk_user_info b on a.urr_userId=b.userid
+		order by a.urr_createdate desc 
+	</select>
+
+	<!-- 修改推荐店铺状态 -->	
+    <update id="updateApplyState" parameterType="pd">
+        update zs_bk_user_recommendr set urr_state=#{state},urr_error_remark=#{remark} 
+        where urr_id=#{urrid}
+    </update>
+    
+</mapper>

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="loginMapper">
+	<!-- 判断是否有给用户发送验证码 -->
+	<select id="hasUser" parameterType="pd" resultType="java.lang.Integer">
+		select
+		count(userid) from zs_bk_user_info where user_code = #{user_code}
+	</select>
+	<!-- 更新用户验证码 -->
+	<update id="updateVerifyCode" parameterType="pd">
+		update
+		zs_bk_user_info set verifycode = #{verifycode} where user_code =
+		#{user_code}
+	</update>
+	<!-- 添加用户 -->
+	<insert id="addUser" parameterType="pd">
+		insert into zs_bk_user_info
+		(user_code,verifycode,user_name,user_invite_code,user_createdate)
+		values
+		(#{user_code},#{verifycode},#{user_name},#{user_invite_code},now())
+	</insert>
+	<!-- 根据用户名得到用户id -->
+	<select id="getUserIdByUserCode" parameterType="pd"
+		resultType="java.lang.Integer">
+		select userid from zs_bk_user_info where user_code
+		=#{user_code}
+	</select>
+
+	<!-- 判定用户是否已经注册成功 -->
+	<select id="getUserRegCode" parameterType="pd" resultType="java.lang.Integer">
+		select if(count(userid)=0 ,0,userid) AS userid from
+		zs_bk_user_info
+		where user_code =#{user_code} AND user_pwd IS NULL
+	</select>
+	<!-- 判定用户 是否注册成功发验证码用户 -->
+	<select id="getCodeUSersuccess" parameterType="pd"
+		resultType="java.lang.Integer">
+		select count(1) from
+		zs_bk_user_info where user_code =#{user_code} AND
+		user_pwd IS not NULL
+	</select>
+	<!-- 更新用户二维码 -->
+	<update id="updateUserQcode" parameterType="pd">
+		update
+		zs_bk_user_info set user_qcode = #{user_qcode} where userid =
+		#{userid}
+	</update>
+	<!-- 判断邀请码是否存在 -->
+	<select id="hasInviteCode" parameterType="java.lang.String"
+		resultType="java.lang.Integer">
+		select count(userid) from zs_bk_user_info where
+		user_invite_code = #{user_invite_code}
+	</select>
+	<!-- 获取用户验证码 -->
+	<select id="getVerifyCode" parameterType="pd" resultType="java.lang.String">
+		select
+		verifycode from zs_bk_user_info where user_code = #{user_code}
+	</select>
+	<!-- 修改用户密码 -->
+	<update id="updateUser" parameterType="pd">
+		update zs_bk_user_info set
+		user_pwd = #{user_pwd},referee_phone = #{referee_phone},
+		user_createdate = now()
+		where user_code = #{user_code}
+	</update>
+	<!-- 用户登录 -->
+	<select id="userLogin" parameterType="pd" resultType="pd">
+		select
+		u.userid,u.user_code,u.verifycode,u.user_name,u.user_img,u.user_sex,u.user_integral,u.user_pwd,u.user_pay_pwd,
+		i.uig_grade_name,i.uig_grade_No,u.user_createdate
+		from zs_bk_user_info
+		u
+		left join zs_bk_user_ig_info i on u.user_grade_integral <![CDATA[>=]]>
+		i.uig_grade_begin and u.user_grade_integral <![CDATA[<]]>
+		i.uig_grade_end
+		where u.user_code = #{user_code}
+		and (u.user_pwd =
+		#{user_pwd} or u.verifycode = #{verifycode})
+	</select>
+	<!-- 更新登录时间 -->
+	<update id="updateLoginTime" parameterType="pd">
+		update
+		zs_bk_user_info set user_last_logindate = now() where user_code =
+		#{user_code}
+	</update>
+	<!-- 查询用户有没有用qq登陆过 -->
+	<select id="hasQqLogin" parameterType="pd" resultType="java.lang.Integer">
+		select
+		count(userid) from zs_bk_user_info where user_qq = #{user_qq}
+	</select>
+	<!-- 添加qq登录用户 -->
+	<insert id="addUserByQq" parameterType="pd">
+		insert into
+		zs_bk_user_info
+		(user_qq,user_name,user_img,user_invite_code,user_last_logindate,user_createdate)
+		values
+		(#{user_qq},#{user_name},#{user_img},#{user_invite_code},now(),now())
+	</insert>
+	<!-- 根据qq号查询用户信息 -->
+	<select id="getUserInfoByQq" parameterType="pd" resultType="java.util.HashMap">
+		select
+		u.userid,u.user_qq,u.user_name,u.user_img,u.user_sex,u.user_integral,u.user_code,u.user_pwd,u.user_pay_pwd,
+		i.uig_grade_name,i.uig_grade_No,u.user_createdate
+		from zs_bk_user_info
+		u
+		left join zs_bk_user_ig_info i on u.user_grade_integral <![CDATA[>=]]>
+		i.uig_grade_begin and u.user_grade_integral <![CDATA[<]]>
+		i.uig_grade_end
+		where u.user_qq = #{user_qq}
+	</select>
+	<!-- 查询用户有没有用wx登陆过 -->
+	<select id="hasWxLogin" parameterType="pd" resultType="java.lang.Integer">
+		select
+		count(userid) from zs_bk_user_info where user_wx = #{user_wx}
+	</select>
+	<!-- 添加wx登录用户 -->
+	<insert id="addUserByWx" parameterType="pd">
+		insert into
+		zs_bk_user_info
+		(user_wx,user_name,user_img,user_invite_code,user_last_logindate,user_createdate)
+		values
+		(#{user_wx},#{user_name},#{user_img},#{user_invite_code},now(),now())
+	</insert>
+	<!-- 根据wx号查询用户信息 -->
+	<select id="getUserInfoByWx" parameterType="pd" resultType="java.util.HashMap">
+		select
+		u.userid,u.user_wx,u.user_name,u.user_img,u.user_sex,u.user_integral,u.user_code,u.user_pwd,u.user_pay_pwd,
+		i.uig_grade_name,i.uig_grade_No,u.user_createdate
+		from zs_bk_user_info
+		u
+		left join zs_bk_user_ig_info i on u.user_grade_integral <![CDATA[>=]]>
+		i.uig_grade_begin and u.user_grade_integral <![CDATA[<]]>
+		i.uig_grade_end
+		where u.user_wx = #{user_wx}
+	</select>
+	<!-- 查询用户有没有用wb登陆过 -->
+	<select id="hasWbLogin" parameterType="pd" resultType="java.lang.Integer">
+		select
+		count(userid) from zs_bk_user_info where user_wb = #{user_wb}
+	</select>
+	<!-- 添加wb登录用户 -->
+	<insert id="addUserByWb" parameterType="pd">
+		insert into
+		zs_bk_user_info
+		(user_wb,user_name,user_img,user_invite_code,user_last_logindate,user_createdate)
+		values
+		(#{user_wb},#{user_name},#{user_img},#{user_invite_code},now(),now())
+	</insert>
+	<!-- 根据wb号查询用户信息 -->
+	<select id="getUserInfoByWb" parameterType="pd" resultType="java.util.HashMap">
+		select
+		u.userid,u.user_wb,u.user_name,u.user_img,u.user_sex,u.user_integral,u.user_code,u.user_pwd,u.user_pay_pwd,
+		i.uig_grade_name,i.uig_grade_No,u.user_createdate
+		from zs_bk_user_info
+		u
+		left join zs_bk_user_ig_info i on u.user_grade_integral <![CDATA[>=]]>
+		i.uig_grade_begin and u.user_grade_integral <![CDATA[<]]>
+		i.uig_grade_end
+		where u.user_wb = #{user_wb}
+	</select>
+	<!-- 绑定手机号 -->
+	<update id="updateUserCode" parameterType="pd">
+		update zs_bk_user_info
+		set user_code = #{user_code},user_pwd = #{user_pwd},
+		user_createdate =
+		now()
+		where userid = #{userid}
+	</update>
+	<!-- 根据userid修改用户验证码 -->
+	<update id="updateVerifyCodeById" parameterType="pd">
+		update
+		zs_bk_user_info set verifycode = #{verifycode} where userid =
+		#{userid}
+	</update>
+	<!-- 根据userid获取用户验证码 -->
+	<select id="getVerifyCodeByUserid" parameterType="pd"
+		resultType="java.lang.String">
+		select verifycode from zs_bk_user_info where userid =
+		#{userid}
+	</select>
+	<!-- 加入新的第三方登录方式 -->
+	<update id="updateUserThirdParty" parameterType="pd">
+		update zs_bk_user_info set
+		<if test="user_qq!=null and user_qq!=''">
+			user_qq = #{user_qq}
+		</if>
+		<if test="user_wx!=null and user_wx!=''">
+			user_wx = #{user_wx}
+		</if>
+		<if test="user_wb!=null and user_wb!=''">
+			user_wb = #{user_wb}
+		</if>
+		where user_code = #{user_code}
+	</update>
+	<!-- 删除无效的第三方登录方式 -->
+	<delete id="deleteThirdPartyAccount" parameterType="pd">
+		delete from
+		zs_bk_user_info where userid = #{userid}
+	</delete>
+	<!-- 通过手机号（登录名）查询用户详情 -->
+	<select id="getUserInfoByUserCode" parameterType="pd"
+		resultType="pd">
+		select
+		u.userid,u.user_code,u.verifycode,u.user_name,u.user_img,u.user_sex,u.user_integral,u.user_pwd,u.user_pay_pwd,
+		i.uig_grade_name,i.uig_grade_No
+		from zs_bk_user_info u
+		left join
+		zs_bk_user_ig_info i on u.user_grade_integral <![CDATA[>=]]>
+		i.uig_grade_begin and u.user_grade_integral <![CDATA[<]]>
+		i.uig_grade_end
+		where u.user_code = #{user_code}
+	</select>
+	<!-- 修改用户密码 -->
+	<update id="updateUserPwd" parameterType="pd">
+		update zs_bk_user_info
+		set user_pwd = #{user_pwd}
+		where user_code = #{user_code}
+	</update>
+	<!-- 修改用户支付密码 -->
+	<update id="updatePayPwd" parameterType="pd">
+		update zs_bk_user_info
+		set user_pay_pwd = #{user_pay_pwd}
+		where user_code = #{user_code}
+	</update>
+	<!-- 得到用户密码 -->
+	<select id="getUserPwd" parameterType="pd" resultType="java.lang.String">
+		select
+		user_pwd from zs_bk_user_info where user_code = #{user_code}
+	</select>
+
+
+	<!-- 根据类型获取欢迎页 -->
+	<select id="getWelCommonImgs" parameterType="pd" resultType="pd">
+		select a.banner_image
+		from zs_bk_banner_info a
+		where
+		a.banner_type=#{type}
+	</select>
+	<!-- 查询加速卡的id -->
+	<select id="getspeedCarId" resultType="java.lang.String">
+		SELECT a.scid FROM
+		zs_bk_speed_card AS a WHERE a.sc_speedc_rate=5
+	</select>
+	<!-- 给新用户发一张5%的加速卡 -->
+	<insert id="sendNewUserspeedcar" parameterType="pd">
+		insert into
+		zs_bk_user_speedc_info
+		(uscid,usc_userId,usc_scid,usc_createdate,usc_state,usc_enddate)
+		values(null,#{userid},#{car_id},now(),#{usc_state},DATE_ADD(now(),INTERVAL
+		10 DAY))
+	</insert>
+	<!-- 根据等级去查询等级名称 -->
+	<select id="getGradeName" parameterType="pd" resultType="java.lang.String">
+		select
+		uig_grade_name from zs_bk_user_ig_info where uig_grade_No =
+		#{uig_grade_No}
+	</select>
+	<select id="getUserphoneBycode" parameterType="pd" resultType="java.lang.Integer">
+		select count(userid) from zs_bk_user_info where user_code=#{user_code}
+	</select>
+
+</mapper>

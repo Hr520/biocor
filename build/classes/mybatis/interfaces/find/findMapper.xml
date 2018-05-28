@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="findMapper">
+	<!-- 查询美食资讯列表 -->
+	<select id="getFoodInfoList" parameterType="pd" resultType="pd">
+		select dfid,discoveryf_type,discoveryf_image,discoveryf_title,discoveryf_content,
+		discoveryf_detail,discoveryf_date
+		from zs_bk_discovery_info 
+		where discoveryf_type = #{discoveryf_type}
+		order by discoveryf_date desc 
+		limit #{num},#{everypage}
+	</select>
+	<!-- 查询咨询详情 -->
+	<select id="informationDetails" parameterType="pd" resultType="pd">
+		select dfid,discoveryf_title,discoveryf_content,discoveryf_date,discoveryf_detail
+		from zs_bk_discovery_info where dfid = #{dfid}
+	</select>
+	<!-- 查询健康测试问题总条数 -->
+	<select id="getQuestionCount" resultType="java.lang.Integer">
+		select count(qid) from zs_bk_question_info 
+	</select>
+	<!-- 查询问题列表 -->
+	<select id="getQuestionList" resultType="pd">
+		select qid,q_qname
+		from zs_bk_question_info 
+		order by q_createdate asc
+	</select>
+	<!-- 查询答案列表 -->
+	<select id="getAnswerList" parameterType="pd" resultType="pd">
+		select qaid,qa_qid,qa_content
+		from zs_bk_question_answer 
+		where qa_qid = #{qid} order by qa_createdate asc
+	</select>
+	<!-- 查询所有菜品 -->
+	<select id="getAllFood" resultType="pd">
+		select g.gid,g.goods_name,g.goods_images,g.goods_sid
+		from zs_bk_goods_info g
+		LEFT JOIN zs_bk_shop_info s on g.goods_sid = s.sid
+		LEFT JOIN zs_bk_shop_type_info t on s.shop_type = t.stid
+		where t.type = 0
+	</select>
+	<!-- 新增用户测试结果 -->
+	<insert id="addUserQuestionTest" parameterType="pd">
+		insert into zs_bk_user_question (uq_qno,uq_userId,uq_answers,uq_createdate,
+		uq_random_goodsname,uq_random_goodsimg,uq_random_sId) 
+		values (#{uq_qno},#{uq_userId},#{uq_answers},now(),
+		#{uq_random_goodsname},#{uq_random_goodsimg},#{uq_random_sId})
+	</insert>
+</mapper>

@@ -1,0 +1,198 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>美食资讯</title>
+    <link rel="stylesheet" type="text/css" href="css/swiper.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/swiper.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script type="text/javascript">
+	    $(function(){
+	    	alert("dfasd");
+	    	getFoodInfoList();
+		});
+	    function getFoodInfoList(){
+	    	var discoveryf_type = $("#discoveryf_type").val();
+	    	var curpage = $("#curpage").val();
+    		$.ajax({
+    			type : "POST",
+    			url : "/interface/find/getFoodInfoList",
+    			data : {discoveryf_type:discoveryf_type,curpage:curpage},
+    			dataType :　"json",
+    			success : function(data){
+    				var contentHtml = "";
+    				$.each(data.list,function(index,content){
+    					contentHtml+= "<a href='food-news.html'><div class='sub-content clearfix'>"
+    					           +"<div class='wrap '><div class='li-left'><img src='"
+    					           +content['discoveryf_image']
+    					           +"' class='all-img'></div><div class='li-right'><h3>"
+    					           +content['discoveryf_title']
+    					           +"</h3><div class='li-des'>"
+                                   +content['discoveryf_content']
+                                   +"</div></div></div></div></a>";
+    				}
+    				$("#content"+discoveryf_type).append(contentHtml);
+    			}
+    		});
+	    }
+    </script>
+</head>
+<body style="background:#f5f5f5;">
+	<input type="hidden" id="discoveryf_type" value="1">
+	<input type="hidden" id="curpage" value="1">
+    <div class="wrapper">
+        <div class="main">
+            <div class="list-box">
+                <ul class="nav-ul">
+                    <li lq ="content1"><a href="javascript:;" class="act">美食头条</a></li>
+                    <li lq="content2"><a href="javascript:;">营养饮食</a></li>
+                    <li lq="content3"><a href="javascript:;">吃货趣事</a></li>
+                </ul>
+            </div>
+            <div class="sub-main">
+                <section  id="content1" class="sub-section" style="display:block;">
+                   <a href="food-news.html"><div class="sub-content clearfix">
+                        <div class="wrap ">
+                            <div class="li-left">
+                                <img src="images/list-pic.png" class="all-img">
+                            </div>
+                            <div class="li-right">
+                                <h3>值得一尝的“黑马餐厅”</h3>
+                                <div class="li-des">
+                                    也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……
+                                </div>
+                            </div>
+                        </div>
+                    </div></a>
+                    <div class="sub-content clearfix">
+                        <div class="wrap ">
+                            <div class="li-left">
+                                <img src="images/list-pic.png" class="all-img">
+                            </div>
+                            <div class="li-right">
+                                <h3>值得一尝的“黑马餐厅”</h3>
+                                <div class="li-des">
+                                    也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-content clearfix">
+                        <div class="wrap ">
+                            <div class="li-left">
+                                <img src="images/list-pic.png" class="all-img">
+                            </div>
+                            <div class="li-right">
+                                <h3>值得一尝的“黑马餐厅”</h3>
+                                <div class="li-des">
+                                    也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </section>
+               <section id="content2" class="sub-section">
+                   <div class="sub-content clearfix">
+                       <div class="wrap ">
+                           <div class="li-left">
+                               <img src="images/list-pic.png" class="all-img">
+                           </div>
+                           <div class="li-right">
+                               <h3>值得一尝的“黑马餐厅”</h3>
+                               <div class="li-des">
+                                   也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+                   <div class="sub-content clearfix">
+                       <div class="wrap ">
+                           <div class="li-left">
+                               <img src="images/list-pic.png" class="all-img">
+                           </div>
+                           <div class="li-right">
+                               <h3>值得一尝的“黑马餐厅”</h3>
+                               <div class="li-des">
+                                   也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </section>
+               <section id="content3" class="sub-section">
+                   <div class="sub-content clearfix" >
+                       <div class="wrap ">
+                           <div class="li-left">
+                               <img src="images/list-pic.png" class="all-img">
+                           </div>
+                           <div class="li-right">
+                               <h3>值得一尝的“黑马餐厅”</h3>
+                               <div class="li-des">
+                                   也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+                   <div class="sub-content clearfix">
+                       <div class="wrap ">
+                           <div class="li-left">
+                               <img src="images/list-pic.png" class="all-img">
+                           </div>
+                           <div class="li-right">
+                               <h3>值得一尝的“黑马餐厅”</h3>
+                               <div class="li-des">
+                                   也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+                   <div class="sub-content clearfix">
+                       <div class="wrap ">
+                           <div class="li-left">
+                               <img src="images/list-pic.png" class="all-img">
+                           </div>
+                           <div class="li-right">
+                               <h3>值得一尝的“黑马餐厅”</h3>
+                               <div class="li-des">
+                                   也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+                   <div class="sub-content clearfix no_line">
+                       <div class="wrap ">
+                           <div class="li-left">
+                               <img src="images/list-pic.png" class="all-img">
+                           </div>
+                           <div class="li-right">
+                               <h3>值得一尝的“黑马餐厅”</h3>
+                               <div class="li-des">
+                                   也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……也许因为美妙的滋味，也许因为文艺的活动，总有它引人的魅力……
+                               </div>
+                           </div>
+                       </div>
+                   </div>
+               </section>
+               <div class="sub-content clearfix" style="text-align: center;">
+                            加载更多
+                    </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function(){
+            $(".nav-ul li").click(function(){
+                $(".nav-ul li a.act").removeClass("act");
+                $(this).find("a").addClass("act");
+
+                var id = $(this).attr("lq");
+                $("#"+id).show().siblings().hide();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="financialMapper">
+<!-- 山莓平台 财务管理模块 大类 -->
+
+
+<!-- 商户端 -->
+<!-- 根据登录的用户查询到用户的店铺Id -->
+<select id="getshopid" parameterType="pd" resultType="java.lang.String">
+	select sid from zs_bk_shop_info where user_id=#{userid}
+</select>
+
+<!-- 查询店铺下的财务统计记录列表调用查询的存储过程-->
+<select id="getshopallMoney" parameterType="pd" resultType="pd" useCache="false" statementType="CALLABLE">
+	    {call shop_order(#{shop_id})}
+</select>
+
+<!-- 查询当前店铺提现记录表 -->
+<select id="getShopapplymoneylistPage" parameterType="pd" resultType="pd">
+	select id,money,getmoney_time,state,agreen_time from  zs_bk_shop_applymoney where shop_id=#{pd.shop_id}
+</select>
+<!-- 根据店铺的id查询到店铺下面可以提现的金额 -->
+<select id="getShopCanmoneyapply" parameterType="pd" resultType="pd">
+	SELECT
+	a.sid as order_sid,ifnull(shop_money,0)as money
+  FROM
+  zs_bk_shop_info AS a
+  WHERE
+  a.sid=#{shop_id}
+</select>
+<!-- 商户提现扣除提现余额 -->
+<update id="updateSHopUserMOney" parameterType="pd">
+	update zs_bk_shop_info set shop_money=shop_money-#{money} where sid=#{shop_id}
+</update>
+<!-- 插入店铺提现申请记录 -->
+<insert id="addapplyMoney" parameterType="pd">
+	insert into zs_bk_shop_applymoney(id,shop_id,money,getmoney_time,state)values(null,#{shop_id},#{money},now(),0)
+</insert>
+<!-- 先查询当前店铺下面的所有菜品 -->
+<select id="getShopByallGoods" parameterType="pd" resultType="pd">
+SELECT a.gid as good_id,a.goods_name,a.goods_moeny,a.goods_images,a.goods_dis_money,b.ft_foodtype_name FROM zs_bk_goods_info AS a 
+LEFT JOIN zs_bk_goodstype_info AS b
+ON a.goods_gtid=b.ftid 
+WHERE a.goods_sid=#{shop_id} AND a.goods_ISshelves=1 GROUP BY a.gid
+</select>
+<!-- 查询所有已经完成订单的菜品销量情况按时间查询 -->
+<select id="getOrderByshopallgoodBywithTime" parameterType="pd" resultType="pd">
+SELECT b.od_goodsId AS good_id,SUM(b.od_goodsNum)AS count FROM zs_bk_order_info AS a 
+LEFT JOIN zs_bk_order_detail_info AS b
+ON a.order_no=b.od_oNO
+LEFT JOIN zs_bk_goods_info AS c 
+ON (b.od_goodsId=c.gid or b.od_goodsId=0) 
+WHERE a.order_sid=#{shop_id}  and a.order_state=2
+<if test="beginTime!=null and beginTime!=''">
+and DATE(a.order_commit_time)&gt;=#{beginTime}
+</if>
+<if test="endTime!=null and endTime!=''">
+and DATE(a.order_commit_time)&lt;=#{endTime}
+</if>
+GROUP BY b.od_goodsId
+</select>
+<!-- 查询店铺下面的餐位费 -->
+<select id="getShopBYcanfei" parameterType="pd" resultType="pd">
+select a.shop_seat_name as goods_name,shop_seat_money as goods_moeny from zs_bk_shop_info as a where a.sid=#{shop_id}
+</select>
+</mapper>

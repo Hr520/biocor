@@ -1,0 +1,75 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>发现首页</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/jquery.min.js"></script>
+</head>
+<body style="background:blue;">
+    <div class="mask" id="shadow"></div>
+    <div class="reply-box">
+        <div class="find-top">
+            <ul class="f-ul clearfix">
+                <li>
+                    <div class="day"></div>
+                    <div class="num-box">
+                        <div class="week"></div>
+                        <div ><span class="month"></span>/<span class="year"></span></div>
+                    </div>
+                </li>
+                <li><img src="images/list-pic.png"  class="all-img"> </li>
+            </ul>
+        </div>
+        <div class="food-list">
+            <ul class="find-ul">
+                <li><a href="food-info.html">
+                        <img src="images/news-icon.png">
+                        <div>美食资讯</div>
+                </a></li>
+                <li><a href="food-test.html">
+                    <img src="images/test-icon.png">
+                    <div>美食测试</div>
+                </a></li>
+            </ul>
+        </div>
+        <div class="f-footer">
+            <img src="images/close-icon.png" class="close-icon" id="close">
+        </div>
+    </div>
+<script>
+    $(function(){
+        //获取当前日期
+        var mydate = new Date();
+        var year = mydate.getFullYear();
+        var month = mydate.getMonth()+1;
+        var day = mydate.getDate();
+        var week;
+        var reg = /^\d{1}$/;
+        if(new Date().getDay()==0) week="星期日";
+        if(new Date().getDay()==1) week="星期一";
+        if(new Date().getDay()==2) week="星期二";
+        if(new Date().getDay()==3) week="星期三";
+        if(new Date().getDay()==4) week="星期四";
+        if(new Date().getDay()==5) week="星期五";
+        if(new Date().getDay()==6) week="星期六";
+        $(".day").text(day);
+        $(".year").text(year);
+        $(".week").text(week);
+        if(reg.test(month)){
+            month = "0" +month;
+            $(".month").text(month);
+        }else{
+            $(".month").text(month);
+        }
+
+        $("#close").click(function(){
+            $("#shadow").hide();
+            $(".reply-box").hide();
+        })
+    });
+</script>
+</body>
+</html>

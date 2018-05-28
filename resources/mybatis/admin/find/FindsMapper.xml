@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="findsMapper">
+
+    <!-- 查询美食咨询列表 -->
+	<select id="getFoodInformationlistPage" parameterType="page" resultType="pd">
+		select a.dfid,a.discoveryf_type,a.discoveryf_image,a.discoveryf_title,
+		    a.discoveryf_content,a.discoveryf_detail,a.discoveryf_date,
+		    a.discoveryf_remark,
+		    case a.discoveryf_type
+		    	when '1' then '美食头条'
+		    	when '2' then '营养饮食'
+		    	when '3' then '吃货趣事'
+		    	else '' end as xdiscoveryf_type
+		from zs_bk_discovery_info a
+		where 1=1 
+		<if test="pd.discoveryf_type != null and pd.discoveryf_type!=''">
+		    and a.discoveryf_type=#{pd.discoveryf_type}
+		</if>
+		order by a.discoveryf_date desc
+	</select>
+	<!-- 根据id查询美食资讯详情 -->
+	<select id="getInformationById" parameterType="pd" resultType="pd">
+		select a.dfid,a.discoveryf_type,a.discoveryf_image,a.discoveryf_title,
+		    a.discoveryf_content,a.discoveryf_detail,a.discoveryf_date,
+		    a.discoveryf_remark,
+		    case a.discoveryf_type
+		    	when '1' then '美食头条'
+		    	when '2' then '营养饮食'
+		    	when '3' then '吃货趣事'
+		    	else '' end as xdiscoveryf_type
+		from zs_bk_discovery_info a
+		where a.dfid= #{dfid}
+	</select>
+	<!-- 新增美食资讯 -->
+	<insert id="addFoodInformation" parameterType="pd">
+		insert into zs_bk_discovery_info (discoveryf_type,discoveryf_image,discoveryf_title,
+		discoveryf_content,discoveryf_date) 
+		values (#{discoveryf_type},#{discoveryf_image},#{discoveryf_title},
+		#{discoveryf_content},now())
+	</insert>
+	<!-- 修改美食资讯 -->
+	<update id="editFoodInformation" parameterType="pd">
+		update zs_bk_discovery_info set discoveryf_type = #{discoveryf_type},
+		discoveryf_image = #{discoveryf_image},discoveryf_title = #{discoveryf_title},
+		discoveryf_content = #{discoveryf_content}
+		where dfid = #{dfid}
+	</update>
+	<!-- 删除美食资讯 -->
+	<delete id="delFoodInformation" parameterType="pd">
+		delete from zs_bk_discovery_info where dfid = #{dfid}
+	</delete>
+</mapper>

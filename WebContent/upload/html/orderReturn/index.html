@@ -1,0 +1,121 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>退款流程</title>
+    <link rel="stylesheet" type="text/css" href="css/tk.css">
+    <script src="../js/jquery.min.js"></script>
+<script type="text/javascript">    
+$(function() {
+	var url = GetRequest();
+	var orderNo = url.orderNo;	
+	$.ajax({
+		type: "POST",
+		url: '/interface/orderprize/getOrderReturn',
+	    data: {
+	    	orderNo:orderNo,
+	    	tm:new Date().getTime()
+	    },
+		dataType:'json',
+		cache: false,
+		success: function(data){
+			//debugger;
+			if("success" == data.state){
+				var pd = data.pd;
+				var money = pd.cancel_moeny;
+				var order_state = pd.order_state;
+				var time1 = pd.order_createdate;
+				var time2 = pd.cancel_time;
+		
+				var state = "";
+				if( order_state ==4 ){
+					state = "退款中";
+				}
+				if( order_state ==5 ){
+					state = "已退款";
+					$("#time3").html(time2);
+				}
+				
+				$("#money").html(money);
+				$("#state").html(state);
+				
+				$("#time1").html(time1);
+				$("#time2").html(time1);
+				
+				if(order_state == 5){
+					$("#id2").removeClass("pro-content active").addClass("pro-content");
+					
+					$("#t3").removeClass("circle act").addClass("circle");
+					$("#id3").removeClass("pro-content un-act").addClass("pro-content no-line");
+				}
+				
+			}else{
+				alert("系统错误!");
+			}
+		}
+    });
+});
+
+function GetRequest() {
+	var url = location.search; //获取url中"?"符后的字串 
+	var theRequest = new Object();
+	if (url.indexOf("?") != -1) {
+		var str = url.substr(1);
+		strs = str.split("&");
+		for (var i = 0; i < strs.length; i++) {
+			theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+		}
+	}
+	return theRequest;
+}    
+</script>
+</head>
+<body style="background:#f5f5f5;">
+<section class="s3">
+    <div class="content-box">
+        <div class="row-div">
+            <div class="l-title">退款金额</div>
+            <div class="r-content color-red"><span id="money"></span>元</div>
+        </div>
+        <div class="row-div">
+            <div class="l-title">退回账本</div>
+            <div class="r-content">本平台“我的钱包”</div>
+        </div>
+        <div class="row-div">
+            <div class="l-title">到账状态</div>
+            <div class="r-content"><span id="state"></span></div>
+        </div>
+    </div>
+</section>
+<section class="s3 mt10">
+    <div class="content-box">
+        <h3 class="tk-h3">退款流程</h3>
+        <ul class="pro-ul">
+            <li class="mt20">
+                <div class="circle"></div>
+                <div class="pro-content ">
+                    <div>退款申请成功</div>
+                    <div class="times"><span id="time1"></span></div>
+                </div>
+            </li>
+            <li>
+                <div class="circle"></div>
+                <div class="pro-content active" id="id2">
+                    <div>平台受理中...</div>
+                    <div class="times"><span id="time2"></span></div>
+                </div>
+            </li>
+            <li>
+                <div class="circle act" id="t3"></div>
+                <div class="pro-content un-act" id="id3">
+                    <div>成功退款到我的钱包</div>
+                    <div class="times"><span id="time3"></span></div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>钱包说明</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/jquery.min.js"></script>
+</head>
+<body style="background:#f5f5f5;">
+<div class="wrapper">
+    <div class="main ">
+        <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title select-icon" status="1">什么是山莓钱包？</div>
+                <div class="select-content" style="display:block;">
+                    <p>山莓消费以现金方式奖励，奖励金额将发放到山莓钱包中。只要注册山莓就可立即拥有一个专属的“山莓钱包”账户，山莓钱包可实现支付，奖励到账，退款，余额查询及提现功能。</p>
+                </div>
+            </div>
+        </section>
+        <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title">钱包支付</div>
+                <div class="select-content">
+                    <p> 提交订单后，在结算页面勾选“账户余额支付”，当订单金额小于钱包余额时，山莓钱包可对订单进行全额支付，当订单金额大于钱包余额时不能勾选。</p>
+                </div>
+            </div>
+        </section>
+        <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title">忘了钱包的支付密码怎么办？</div>
+                <div class="select-content">
+                    <p>到个人中心-设置-账户与安全-修改支付密码，根据提示进行修改。</p>
+                </div>
+            </div>
+        </section>
+        <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title">钱包退款</div>
+                <div class="select-content">
+                    <p>在山莓消费产生的退款金额，将按照订单退款规则直接退回您的山莓钱包账户，若在预约时间1小时内取消订单，将在支付款项中扣减10%，若超过预约时间取消订单将在支付款项中扣减30%，剩余支付款项将于2个工作日直接退回您的山莓钱包账户，可用于下一次支付。</p>
+                </div>
+            </div>
+        </section>
+        <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title no_line">钱包提现</div>
+                <div class="select-content no_line">
+                    <p>如需提现可在个人中心-我的钱包-提现中根据提示进行操作。</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+<script>
+    $(function(){
+        var show = function(obj){
+            var status = obj.attr('status');
+            if(status == 0 || !status){
+                $(".select-title[status=1]").attr('status', 0).removeClass("select-icon").next().slideUp();
+                obj.attr('status', 1).addClass('select-icon').next().slideDown();
+
+            }else{
+                obj.attr('status', 0).removeClass("select-icon").next().slideUp();
+            }
+        };
+        $(".select-title").click(function(){
+            show($(this));
+
+
+        })
+
+    });
+</script>
+</body>
+</html>

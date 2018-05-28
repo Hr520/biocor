@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="findQuestMapper">
+
+    <!-- 查询问题列表 -->
+	<select id="getQuestlistPage" parameterType="pd" resultType="pd" useCache="false">
+		select a.qid,a.q_qname,a.q_qNO,a.q_type,a.q_answer,a.q_createdate,a.q_remark
+		from zs_bk_question_info a
+		where 1=1 
+		order by a.q_qNO asc
+	</select>
+
+    <!-- 添加问题-->
+	<insert id="addQuest" parameterType="pd">
+	    insert into zs_bk_question_info(
+	        q_qname,q_qNO,q_type,
+	        q_answer,q_createdate,q_remark
+	        )
+	    values(
+	        #{q_qname},#{q_qNO},#{q_type},
+	        #{q_answer},#{q_createdate},#{q_remark}
+	        )
+	</insert>
+		
+    <!-- 删除问题 -->
+	<delete id="deleteQuest" parameterType="pd">
+	    delete from zs_bk_question_info where qid=#{qid}
+	</delete>	
+	
+	
+	
+	
+	<!-- 查询问题答案列表 -->
+	<select id="getQuestAnswerlistPage" parameterType="pd" resultType="pd" useCache="false">
+		select a.qaid,a.qa_qid,a.qa_no,a.qa_content,a.qa_remark,a.qa_createdate
+		from zs_bk_question_answer a
+		where 1=1 and a.qa_qid=#{pd.qid}
+		order by a.qa_createdate asc
+	</select>
+
+    <!-- 添加问题答案-->
+	<insert id="addQuestAnswer" parameterType="pd">
+	    insert into zs_bk_question_answer(
+	        qa_qid,qa_no,qa_content,
+	        qa_remark,qa_createdate
+	        )
+	    values(
+	        #{qa_qid},#{qa_no},#{qa_content},
+	        #{qa_remark},#{qa_createdate}
+	        )
+	</insert>
+		
+    <!-- 删除问题答案 -->
+	<delete id="deleteQuestAnswer" parameterType="pd">
+	    delete from zs_bk_question_answer where qaid=#{qaid}
+	</delete>	
+
+    <!-- 删除问题的所有答案 -->
+	<delete id="deleteQuestAllAnswer" parameterType="pd">
+	    delete from zs_bk_question_answer where qa_qid=#{qid}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,285 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="format-detection" content="telephone=no" />
+    <title>积分帮助</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+     <style>
+        #exp{
+            transition: width 1s linear 0s;
+            animation: animate-positive 2s;
+        }
+        @-webkit-keyframes animate-positive{
+            0% { width: 0%; }
+        }
+        @keyframes animate-positive{
+            0% { width: 0%; }
+        }
+        .pl10{
+            padding-left:10px;
+        }
+        .select-ul{
+            margin:5px 0;
+            border:1px solid #666;
+        }
+        .select-ul li{
+            line-height:30px;
+            padding-left:10px;
+            border-bottom:1px solid #666;
+        }
+    </style>
+    <script src="js/jquery.min.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+    		memberGradeInfo();
+    	});
+    	function memberGradeInfo(){
+    		var userid = getUrlParam("userid");
+    		$.ajax({
+    			type : "POST",
+    			url : "/interface/userInfo/memberH5",
+    			data : {userid:userid},
+    			dataType :　"json",
+    			success : function(data){
+    				var surplus = parseInt(data['uig_grade_end']) - parseInt(data['user_grade_integral']);
+    				var jifen = data['user_grade_integral'];
+    				if (surplus<0) {
+    					surplus = 0;
+    					jifen = parseInt(data['uig_grade_end']);
+					}
+    				var uig_grade_No = data['uig_grade_No'];
+    				$("#user_img").attr('src',"/"+data['user_img']);
+    				$("#user_name").css("color","FFFFFF");
+    				$("#user_name").html(data['user_name']);
+    				$("#user_grade_integral").html(data['user_grade_integral']);
+    				$("#jifen").html(jifen);
+    				$("#uig_grade_end").html(data['uig_grade_end']);
+    				
+    				var percentage = ( parseInt(uig_grade_No)/6 )*100;
+    				$("#percentage").css("width",percentage+"%");
+    				
+    				$("#surplus").html(surplus);
+    				if(uig_grade_No=="0"){
+    					$("#v0").attr('src',"images/V0.png");
+    					$("#uig_grade_No_img").attr('src',"images/v0y.png");
+    				}else if (uig_grade_No=="1") {
+    					$("#v1").attr('src',"images/V1_r.png");
+    					$("#uig_grade_No_img").attr('src',"images/v1y.png");
+					}else if (uig_grade_No=="2") {
+    					$("#v2").attr('src',"images/V2_r.png");
+    					$("#uig_grade_No_img").attr('src',"images/v2y.png");
+					}else if (uig_grade_No=="3") {
+    					$("#v3").attr('src',"images/V3_r.png");
+    					$("#uig_grade_No_img").attr('src',"images/v3y.png");
+					}else if (uig_grade_No=="4") {
+    					$("#v4").attr('src',"images/V4_r.png");
+    					$("#uig_grade_No_img").attr('src',"images/v4y.png");
+					}else if (uig_grade_No=="5") {
+    					$("#v5").attr('src',"images/V5_r.png");
+    					$("#uig_grade_No_img").attr('src',"images/v5y.png");
+					}else{
+						$("#v6").attr('src',"images/V-6_r.png");
+						$("#uig_grade_No_img").attr('src',"images/v6y.png");
+					}
+    			}
+    		});
+    	}
+    	/**
+    	截取url中的参数
+    	*/
+    	function getUrlParam(name)
+    	{
+    	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+    	var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+    	if (r!=null) return unescape(r[2]); return null; //返回参数值
+    	}
+    </script>
+</head>
+<body style="background:#f5f5f5;">
+<div class="wrapper">
+    <div class="main ">
+        <section class="mem-section">
+            <div class="mem-title">
+                <img src="" class="title-pic" id="user_img">
+                <img src="" class="vip-icon" id="uig_grade_No_img">
+            </div>
+            <div class="mem-name">
+                <div id="user_name"></div>
+                <div>我的成长值：<span id="user_grade_integral"></span></div>
+            </div>
+        </section>
+        <section class="bz-section bt5">
+            <div class="select-box">
+                <div class="list-title">我的会员</div>
+                <div class="mem-progress">
+                    <div class="mem-num"><em class="em" id="jifen"></em>/<span id="uig_grade_end"></span></div>
+                    <div class="weui_progress">
+                        <div class="weui_progress_bar">
+                            <div class="weui_progress_inner_bar js_progress" style="width: 0%;" id="percentage"></div>
+                        </div>
+                    </div>
+                    <ul class="v-icon clearfix" style="width: 100%">
+                        <li><img src="images/V0-_gray.png" id="v0"></li>
+                        <li><img src="images/V1.png" id="v1"></li>
+                        <li><img src="images/V2.png" id="v2"></li>
+                        <li><img src="images/V3.png" id="v3"></li>
+                        <li><img src="images/V4.png" id="v4"></li>
+                        <li><img src="images/V5.png" id="v5"></li>
+                        <li class="last-li"><img src="images/V6.png" id="v6"></li>
+                    </ul>
+                    <div class="mem-des" >距离下一等级还需<span id="surplus"></span>成长值</div>
+                </div>
+            </div>
+        </section>
+           <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title select-icon" status="1">会员如何升级</div>
+                <div class="select-content" style="display:block;">
+                    <p>成长值统计周期：每月28号，当会员的当月成长值达到或超过更高等级的成长值及等级指数时，则自动升级到对应的等级，每年1月1号平台将对获得最新会员等级身份超过一年的会员进行等级核算，依据会员上年度所获得的成长值及等级指数核算，赋予新的等级。</p>
+                </div>
+            </div>
+        </section>
+        <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title">会员特权</div>
+                <div class="select-content">
+                    <div class="sm-li">
+                        <h4>积分送</h4>
+                        <div>会员消费可获得相应积分，积分可兑换加速卡，还可以兑换特选商品。</div>
+                        <div>等级越高获得的积分比例越高，最高可获得100%积分奖励。</div>
+                    </div>
+                    <div class="sm-li">
+                        <h4>加速卡兑换</h4>
+                        <table class="jf-table" border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td>等级</td>
+                                <td>V0</td>
+                                <td>V1</td>
+                                <td>V2</td>
+                                <td>V3</td>
+                                <td>V4</td>
+                                <td>V5</td>
+                                <td>V6</td>
+                            </tr>
+                            <tr>
+                                <td>100积分=5%</td>
+                                <td></td>
+                                <td>√</td>
+                                <td>√</td>
+                                <td>√</td>
+                                <td>√</td>
+                                <td>√</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>600积分=30%</td>
+                                <td></td>
+                                <td></td>
+                                <td>√</td>
+                                <td>√</td>
+                                <td>√</td>
+                                <td>√</td>
+                                <td>√</td>
+                            </tr>
+                            <tr>
+                                <td>800积分=45%</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>√</td>
+                                <td>√</td>
+                                <td>√</td>
+                            </tr>
+                            <tr>
+                                <td>1000积分=55%</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>√</td>
+                                <td>√</td>
+                            </tr>
+                            <tr>
+                                <td>2000积分=100%</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>√</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="sm-li">
+                        <h4>奖励加速</h4>
+                        <div>等级越高奖励排队越靠前，奖励速度越快</div>
+                    </div>
+                   <!-- <div class="sm-li">
+                        <h4>生日惊喜</h4>
+                    </div>
+                    <div class="sm-li no_line">
+                        <h4>其他</h4>
+                    </div>-->
+
+                    <!--<div class="mt5">
+
+                    </div>
+                    <div class="mt5">
+
+                    </div>
+                    <div class="mt5">
+
+                    </div>
+                    <div class="mt5">
+
+                    </div>-->
+                </div>
+            </div>
+        </section>
+        <section class="bz-section">
+            <div class="select-box">
+                <div class="select-title">成长值说明</div>
+                <div class="select-content">
+                    <p>1.成长值是衡量山莓会员等级的数值之一</p>
+                    <p>2.会员在山莓消费即可奖励相应的成长值，成长值计算方式如下：
+                        <ul class="select-ul">
+                            <li>①消费金额＜10元，不累计成长值，不参与抽奖 </li>
+                            <li>②10≤消费金额≤500，1元获得0.5个成长值 </li>
+                            <li>③500＜消费金额≤2000，1元获得0.8个成长值 </li>
+                            <li>④2000＜消费金额≤4000，1元获得1个成长值 </li>
+                            <li style="border-bottom:none;">⑤消费金额＞4000,均获得4000成长值</li>
+                        </ul>
+                        <div style="padding:3px 0;">注：其中普通会员消费金额<100元，不累计成长值</div>
+                    </p>
+                    <p>3.订单取消，将收回相应消费奖励成长值，若在预约时间1小时内或者超过预约时间取消订单则收回相应消费奖励成长值且对此行为额外扣减成长值。</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+<script>
+$(function(){
+    var show = function(obj){
+        var status = obj.attr('status');
+        if(status == 0 || !status){
+            $(".select-title[status=1]").attr('status', 0).removeClass("select-icon").next().slideUp();
+            obj.attr('status', 1).addClass('select-icon').next().slideDown();
+
+        }else{
+            obj.attr('status', 0).removeClass("select-icon").next().slideUp();
+        }
+    };
+    $(".select-title").click(function(){
+        show($(this));
+    })
+
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userInfoMapper">
+	<!-- 查询用户详情 -->
+	<select id="getUserInfo" parameterType="pd" resultType="pd">
+		select
+		a.userid,a.user_name,a.user_img,a.user_sex,a.user_birthday,
+		a.user_addres,a.user_qcode,a.user_code,a.user_integral,
+		a.user_createdate,
+		b.uig_grade_No,b.uig_grade_name from
+		zs_bk_user_info
+		AS a LEFT JOIN
+		zs_bk_user_ig_info AS b ON
+		user_grade_integral&gt;=b.uig_grade_begin
+		AND
+		user_grade_integral&lt;b.uig_grade_end where userid =#{userid}
+	</select>
+
+	<!-- 查询系统推送消息条数 -->
+	<select id="getmessagecountA" resultType="java.lang.Integer">
+		SELECT
+		count(c.umid) AS
+		totle
+		FROM zs_bk_user_message AS c
+		WHERE c.um_msg_type=1 and
+		c.u_tuistate=0
+	</select>
+	<!-- 用户推送接收消息数 -->
+	<select id="getmessagecountB" parameterType="pd" resultType="java.lang.Integer">
+		SELECT
+		count(c.umid) AS totle
+		FROM zs_bk_user_message AS c
+		WHERE
+		c.um_userId=#{userid} and c.u_tuistate=0
+	</select>
+	<!-- 修改用户头像 -->
+	<update id="updateUserHeadImage" parameterType="pd">
+		update
+		zs_bk_user_info set user_img = #{user_img} where userid = #{userid}
+	</update>
+	<!-- 修改用户信息 -->
+	<update id="updateUserInfo" parameterType="pd">
+		update zs_bk_user_info set
+		<if test="user_name!=null and user_name != ''">
+			user_name = #{user_name}
+		</if>
+		<if test="user_sex!=null and user_sex != ''">
+			user_sex = #{user_sex}
+		</if>
+		<if test="user_birthday!=null and user_birthday != ''">
+			user_birthday = #{user_birthday}
+		</if>
+		<if test="user_addres!=null and user_addres != ''">
+			user_addres = #{user_addres}
+		</if>
+		where userid = #{userid}
+	</update>
+	<!-- 更换用户手机号(登录名) -->
+	<update id="replacePhone" parameterType="pd">
+		update zs_bk_user_info
+		set user_code = #{user_code} where userid = #{userid}
+	</update>
+	<!-- 实名认证 -->
+	<insert id="realNameAuthentication" parameterType="pd">
+		insert into
+		zs_bk_user_account_info (ua_userId,ua_userName,ua_userIP,ua_user_tel)
+		values (#{ua_userId},#{ua_userName},#{ua_userIP},#{ua_user_tel})
+	</insert>
+	<!-- 查询推广记录 -->
+	<select id="promotionRecord" parameterType="pd" resultType="pd">
+		select userid,user_code,user_name,user_img,user_createdate
+		from
+		zs_bk_user_info where referee_phone =#{user_code}
+		order by
+		user_createdate desc
+		limit #{num},#{everypage}
+	</select>
+	<!-- 我的关注 -->
+	<select id="myFollowList" parameterType="pd" resultType="pd">
+		SELECT
+		f.uf_shop_name,f.uf_shop_images,f.uf_sid,
+		s.shop_consume,s.shop_draw,s.shop_grade,s.shop_street,
+		t.st_name,
+		ROUND(6378.138*2*ASIN(SQRT(POW(SIN(
+		(#{lat}*PI()/180-s.shop_latitude*PI()/180)/2),2)+
+		COS(#{lat}*PI()/180)*COS(s.shop_latitude*PI()/180)* POW(SIN(
+		(#{lng}*PI()/180-s.shop_longitude*PI()/180)/2),2)))*1000) as distance
+		from zs_bk_user_follow_info f
+		LEFT JOIN zs_bk_shop_info s on f.uf_sid =
+		s.sid
+		LEFT JOIN zs_bk_shop_type_info t on s.shop_type = t.stid
+		where
+		f.uf_userId = #{userid}
+		order by f.uf_createdate desc
+		limit
+		#{num},#{everypage}
+	</select>
+	<!-- 我的消息 -->
+	<select id="myMessage" parameterType="pd" resultType="pd">
+		select
+		umid,um_userId,um_msg_type,um_orderId,um_orderNO,um_msgdate,um_msgtitle,
+		um_msgcontent,umremark
+		from zs_bk_user_message
+		where um_userId =
+		#{userid} or um_msg_type=1 AND u_tuistate=0
+		order by um_msgdate desc
+		limit
+		#{num},#{everypage}
+	</select>
+	<!-- 根据用户id查询用户二维码 -->
+	<select id="getUserQrcode" parameterType="pd" resultType="java.lang.String">
+		select
+		user_qcode from zs_bk_user_info where userid = #{userid}
+	</select>
+	<!-- 会员等级详情 -->
+	<select id="getMemberGradeInfo" parameterType="pd" resultType="pd">
+		select u.userid,u.user_grade_integral,u.user_name,u.user_img,
+		    u.user_grade_integral,u.user_integral,u.user_sex,u.user_birthday,u.user_addres,
+		    i.uig_grade_name,i.uig_grade_No,i.uig_grade_end,i.uig_grade_begin,u.user_createdate
+		from
+		zs_bk_user_info u
+		left join zs_bk_user_ig_info i on
+		u.user_grade_integral <![CDATA[>=]]>
+		i.uig_grade_begin and u.user_grade_integral <![CDATA[<]]>
+		i.uig_grade_end
+		where userid = #{userid}
+	</select>
+	<!-- 根据版本号查询版本内容 -->
+	<select id="findVersion" parameterType="pd" resultType="pd">
+		select a.version,a.version_name,a.version_url,a.content,a.createtime
+		from zs_bk_version_config a
+		where
+		a.version <![CDATA[>]]>
+		#{version} ORDER BY a.version desc
+		LIMIT 0,1
+	</select>
+	<!-- 根据等级查询等级结束的积分 -->
+	<select id="getGradeEndIntegral" parameterType="pd"
+		resultType="java.lang.Integer">
+		select uig_grade_end from zs_bk_user_ig_info where
+		uig_grade_No = #{uig_grade_No}
+	</select>
+	<!-- 根据用户成长值查询等级 -->
+	<select id="getUserLevel" parameterType="pd" resultType="java.lang.Integer">
+		select uig_grade_No from zs_bk_user_ig_info where #{user_grade_integral}<![CDATA[>=]]>uig_grade_begin and #{user_grade_integral}<![CDATA[<]]> uig_grade_end 
+	</select>
+</mapper>

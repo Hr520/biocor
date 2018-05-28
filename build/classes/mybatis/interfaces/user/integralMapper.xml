@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="integralMapper">
+	<!-- 查询用户积分 -->
+	<select id="myIntegral" parameterType="pd" resultType="java.lang.Integer">
+		select user_integral  from zs_bk_user_info where userid = #{userid}
+	</select>
+	<!-- 查询用户的成长值 -->
+	<select id="getUsergrade_integral" parameterType="pd" resultType="java.lang.Integer">
+				select  user_grade_integral from zs_bk_user_info where userid = #{userid}
+	</select>
+	<!-- 查询用户等级积分 -->
+	<select id="myGradeIntegral" parameterType="pd" resultType="java.lang.Integer">
+		SELECT b.uig_grade_No
+        FROM zs_bk_user_info a
+        LEFT JOIN zs_bk_user_ig_info b ON 
+          (a.user_grade_integral <![CDATA[>=]]> b.uig_grade_begin 
+             AND a.user_grade_integral <![CDATA[<]]> b.uig_grade_end )
+        WHERE userid = #{userid}
+	</select>
+	
+	<!-- 查询用户积分获得消费记录 -->
+	<select id="getIntegralRecord" parameterType="pd" resultType="pd">
+		select i.ui_userid,i.ui_integral_type,i.ui_createdate,i.ui_integral_score,
+		s.shop_name,s.shop_images
+		from zs_bk_user_integral_info i left join zs_bk_shop_info s on i.ui_sid = s.sid
+		where ui_userid = #{userid}
+		order by i.ui_createdate desc
+		limit #{num},#{everypage}
+	</select>
+	<!-- 查询积分商场加速卡列表 -->
+	<select id="integralShop" parameterType="pd" resultType="pd">
+		select scid,sc_speedc_name,sc_speedc_integral,sc_speedc_rate,sc_speedc_date,
+		sc_beggrade,sc_endgrade
+		from zs_bk_speed_card
+		where sc_state = 1
+		order by sc_speedc_rate asc
+		limit #{num},#{everypage}
+	</select>
+	<!-- 查询用户未使用的加速卡 -->
+	<select id="myUnusedSpeedCard" parameterType="pd" resultType="pd">
+		select us.uscid,us.usc_userId,us.usc_scid,us.usc_createdate,
+		us.usc_state,us.usc_enddate,us.usc_update,
+		s.sc_speedc_name,s.sc_speedc_rate
+		from zs_bk_user_speedc_info us 
+		left join zs_bk_speed_card s on us.usc_scid = s.scid
+		where us.usc_userId = #{userid} and us.usc_state = '0'
+		and date(now()) <![CDATA[<=]]> date(us.usc_enddate)
+		order by us.usc_createdate desc
+		limit #{num},#{everypage}
+	</select>
+	<!-- 查询用户已使用的加速卡 -->
+	<select id="myUsedSpeedCard" parameterType="pd" resultType="pd">
+		select us.uscid,us.usc_userId,us.usc_scid,us.usc_createdate,
+		us.usc_state,us.usc_enddate,us.usc_update,
+		s.sc_speedc_name,s.sc_speedc_rate
+		from zs_bk_user_speedc_info us 
+		left join zs_bk_speed_card s on us.usc_scid = s.scid
+		where us.usc_userId = #{userid} and us.usc_state = '1'
+		order by us.usc_createdate desc
+		limit #{num},#{everypage}
+	</select>
+	<!-- 根据积分卡id查询加速卡详情 -->
+	<select id="getSpeedCardInfo" parameterType="pd" resultType="pd">
+		select scid,sc_speedc_integral,sc_speedc_rate,sc_beggrade,sc_endgrade,sc_speedc_date
+		from zs_bk_speed_card where scid = #{scid}
+	</select>
+	<!-- 添加用户加速卡 -->
+	<insert id="addUserSpeedCard" parameterType="pd">
+		insert into zs_bk_user_speedc_info (usc_userId,usc_scid,usc_createdate,usc_enddate) 
+		values (#{userid},#{scid},#{usc_createdate},#{usc_enddate})
+	</insert>
+	<!-- 修改用户积分 -->
+	<update id="updateUserIntegral" parameterType="pd">
+		update zs_bk_user_info set user_integral = #{user_integral} where userid = #{userid}
+	</update>
+	<!-- 在积分记录表中新增一条数据 -->
+	<insert id="addUserIntegralRecord" parameterType="pd">
+		insert into zs_bk_user_integral_info (ui_userid,ui_integral_type,ui_createdate,ui_integral_score) 
+		values (#{userid},#{ui_integral_type},now(),#{ui_integral_score})
+	</insert>
+	<!-- 查询用户等级积分和用户注册时间 -->
+	<select id="MyGradeAndRegisterTime" parameterType="pd" resultType="pd">
+		SELECT b.uig_grade_No,a.user_createdate
+        FROM zs_bk_user_info a
+        LEFT JOIN zs_bk_user_ig_info b ON 
+          (a.user_grade_integral <![CDATA[>=]]> b.uig_grade_begin 
+             AND a.user_grade_integral <![CDATA[<]]> b.uig_grade_end )
+        WHERE userid = #{userid}
+	</select>
+</mapper>

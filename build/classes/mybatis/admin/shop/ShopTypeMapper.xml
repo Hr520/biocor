@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="shopTypeMapper">
+
+    <!-- 查询店铺类型列表 -->
+	<select id="findShopTypelistPage" parameterType="pd" resultType="pd" useCache="false">
+		SELECT a.stid,a.st_name,a.st_img,a.st_createdate,a.st_remark,a.type
+        FROM zs_bk_shop_type_info a
+        WHERE 1=1  
+		order by a.st_createdate desc
+	</select>
+
+	<!-- 添加店铺类型 -->
+	<insert id="addShopType" parameterType="pd">
+	    insert into zs_bk_shop_type_info(
+	        st_name,st_img,st_createdate,st_remark,type
+	        )
+	    values(
+	        #{st_name},#{st_img},#{st_createdate},#{st_remark},#{type}
+	        )
+	</insert>	
+	
+	<!-- 删除店铺类型 -->
+	<delete id="delShopType" parameterType="pd">
+	    delete from zs_bk_shop_type_info where stid=#{stid}
+	</delete>	
+
+
+</mapper>

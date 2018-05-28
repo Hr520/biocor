@@ -1,0 +1,56 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>美食头条</title>
+    <link rel="stylesheet" type="text/css" href="css/swiper.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/swiper.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script type="text/javascript">
+    	$(function(){
+    		details();
+    	});
+    	function details(){
+    		var dfid = getUrlParam("dfid");
+    		$.ajax({
+    			type : "POST",
+    			url : "/interface/find/informationDetails",
+    			data : {dfid:dfid},
+    			dataType :　"json",
+    			success : function(data){
+    				$("#discoveryf_title").html(data['discoveryf_title']);
+    				$("#discoveryf_date").html(data['discoveryf_date']);
+    				$("#discoveryf_content").html(data['discoveryf_content']);
+    			}
+    		});
+    	}
+    	/**
+    	截取url中的参数
+    	*/
+    	function getUrlParam(name)
+    	{
+    	var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+    	var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+    	if (r!=null) return unescape(r[2]); return null; //返回参数值
+    	}
+    </script>
+</head>
+<body style="background:#f5f5f5;">
+    <div class="wrapper">
+        <div class="main ">
+            <div class="wrap">
+                <div class="art-head">
+                    <h3 class="art-title" id="discoveryf_title"></h3>
+                    <div class="times" id="discoveryf_date"></div>
+                </div>
+                <div class="art-content" id="discoveryf_content">
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

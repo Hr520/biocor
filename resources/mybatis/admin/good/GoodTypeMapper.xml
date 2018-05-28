@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="goodTypeMapper">
+
+    <!-- 查询商品类型列表 -->
+	<select id="findGoodTypelistPage" parameterType="pd" resultType="pd" useCache="false">
+		SELECT a.ftid,a.ft_foodtype_name,a.ft_foodtype_createdate,a.ft_foodtype_remark
+        FROM zs_bk_goodstype_info a
+        WHERE 1=1  
+		order by a.ft_foodtype_createdate desc
+	</select>
+
+	<!-- 添加商品类型 -->
+	<insert id="addGoodType" parameterType="pd">
+	    insert into zs_bk_goodstype_info(
+	        ft_foodtype_name,ft_foodtype_createdate,ft_foodtype_remark
+	        )
+	    values(
+	        #{ft_foodtype_name},#{ft_foodtype_createdate},#{ft_foodtype_remark}
+	        )
+	</insert>	
+	
+	<!-- 删除商品类型 -->
+	<delete id="delGoodType" parameterType="pd">
+	    delete from zs_bk_goodstype_info where ftid=#{ftid}
+	</delete>	
+
+
+</mapper>

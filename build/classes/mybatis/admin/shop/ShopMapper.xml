@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="shopMapper">
+
+	<!-- 查询店铺列表 -->
+	<select id="findShoplistPage" parameterType="pd" resultType="pd"
+		useCache="false">
+
+		select a.sid,a.shop_name,a.shop_consume,a.shop_province,
+		a.shop_city,a.shop_area,a.shop_street,a.shop_time,
+		a.shop_adders,ifnull(a.machine_code,'')machine_code,ifnull(a.mKey,'')mKey,
+		a.shop_tel,a.shop_images,a.shop_activity,a.shop_draw,
+		a.shop_longitude,a.shop_latitude,a.shop_createdate,a.remark,
+		a.shop_introduce,a.shop_ISrecommend,a.shop_ISshelves,a.user_id,
+		a.shop_type,a.shop_grade,a.shop_code,
+		b.USERNAME,c.st_name
+
+		from zs_bk_shop_info a
+		left join sys_user b on a.user_id = b.USER_ID
+		left join zs_bk_shop_type_info c on a.shop_type = c.stid
+		where 1=1
+		<if test="pd.shopName != null and pd.shopName != ''">
+			and a.shop_name like '%${pd.shopName}%'
+		</if>
+		<if test="pd.stype != null and pd.stype != ''">
+			and a.shop_type = #{pd.stype,jdbcType=NUMERIC}
+		</if>
+		<if test="pd.type != 1">
+			and a.user_id = #{pd.userid} and a.shop_ISshelves = 1
+		</if>
+		order by a.shop_createdate desc
+	</select>
+
+	<!-- 添加店铺 -->
+	<insert id="addShop" parameterType="pd" useGeneratedKeys="true"
+		keyProperty="sid">
+		insert into zs_bk_shop_info(
+		shop_name,shop_consume,shop_adders,shop_tel,shop_images,
+		shop_activity,shop_draw,shop_longitude,shop_latitude,
+		shop_createdate,remark,shop_introduce,shop_ISrecommend,
+		shop_ISshelves,user_id,mKey,machine_code
+		)
+		values(
+		#{shop_name},#{shop_consume},#{shop_adders},#{shop_tel},#{shop_images},
+		#{shop_activity},#{shop_draw},#{shop_longitude},#{shop_latitude},
+		#{shop_createdate},#{remark},#{shop_introduce},#{shop_ISrecommend},
+		#{shop_ISshelves},#{user_id},#{mKey},#{machine_code}
+		)
+	</insert>
+
+	<!-- 根据店铺ID查询店铺详情 -->
+	<select id="findShopBySid" parameterType="pd" resultType="pd"
+		useCache="false">
+		select a.sid,a.shop_name,a.shop_consume,a.shop_province,
+		a.shop_city,a.shop_area,a.shop_street,a.shop_time,
+		a.shop_adders,ifnull(a.machine_code,'')machine_code,ifnull(a.mKey,'')mKey,
+		a.shop_tel,a.shop_images,a.shop_activity,a.shop_draw,
+		a.shop_longitude,a.shop_latitude,a.shop_createdate,a.remark,
+		a.shop_introduce,a.shop_ISrecommend,a.shop_ISshelves,a.user_id,
+		a.shop_type,a.shop_grade,a.shop_seat_name,a.shop_seat_money,
+		b.USERNAME,c.st_name
+		from zs_bk_shop_info a
+		left join sys_user b on a.user_id = b.USER_ID
+		left join zs_bk_shop_type_info c on a.shop_type = c.stid
+		where 1=1 and
+		a.sid=#{shopid}
+	</select>
+
+	<!-- 修改店铺 -->
+	<update id="updateShop" parameterType="pd">
+		update zs_bk_shop_info set
+		shop_name=#{shop_name},shop_consume=#{shop_consume},
+		shop_province=#{shop_province},shop_city=#{shop_city},shop_area=#{shop_area},
+		shop_street=#{shop_street},shop_time=#{shop_time},
+		shop_adders=#{shop_adders},shop_tel=#{shop_tel},shop_images=#{shop_images},
+		shop_activity=#{shop_activity},shop_draw=#{shop_draw},shop_longitude=#{shop_longitude},
+		shop_latitude=#{shop_latitude},remark=#{remark},shop_introduce=#{shop_introduce},
+		shop_type=#{shop_type},
+		<if test="shop_seat_name!=null and shop_seat_name!=''">
+		shop_seat_name=#{shop_seat_name},
+		</if>
+		<if test="shop_seat_money!=0 and shop_seat_money!=null">
+		shop_seat_money=#{shop_seat_money},
+		</if>
+		mKey=#{mKey},
+		machine_code=#{machine_code}
+		where sid=#{sid}
+	</update>
+
+	<!-- 删除店铺 -->
+	<update id="deleteShop" parameterType="pd">
+		update zs_bk_shop_info set shop_ISshelves = #{state} where sid=#{shopid}
+	</update>
+
+	<!-- 推荐店铺 -->
+	<update id="commendShop" parameterType="pd">
+		update zs_bk_shop_info set shop_ISrecommend = #{state} where sid=#{shopid}
+	</update>
+
+	<!-- 查询所有店铺类型 -->
+	<select id="findAllShopType" parameterType="pd" resultType="pd"
+		useCache="false">
+		select a.stid,a.st_name,a.st_img,a.st_remark,a.type
+		from zs_bk_shop_type_info a
+		where 1=1
+	</select>
+
+	<!-- findGoodslistPage -->
+	<select id="findGoodslistPage" parameterType="page" resultType="pd"
+		useCache="false">
+		select
+		y.gid,y.goods_dis_money,y.goods_moeny,y.goods_name,y.goods_sid,z.shop_name,z.shop_adders,r.st_name
+		from zs_bk_goods_info y
+		LEFT JOIN
+		zs_bk_shop_info z on (y.goods_sid=z.sid)
+		LEFT JOIN
+		zs_bk_shop_type_info r on (z.shop_type=r.stid)
+			<![CDATA[ where y.goods_gtid<>10 ]]>
+
+		<if test="pd.shopName != null and pd.shopName != ''">
+			and z.shop_name like '%${pd.shopName}%'
+		</if>
+		<if test="pd.stype != null and pd.stype != ''">
+			and z.shop_type = #{pd.stype,jdbcType=NUMERIC}
+		</if>
+		order by y.goods_name desc
+	</select>
+	
+	
+	<!-- 通过系统用户ID查询店铺ID -->
+	<select id="findShopByUserid" parameterType="pd" resultType="pd"
+		useCache="false">
+		select a.sid
+		from zs_bk_shop_info a
+		where 1=1 and a.user_id=#{user_id}
+	</select>
+	
+	<!-- 更新店铺二维码 -->
+	<update id="updateShopCode" parameterType="pd">
+	    update zs_bk_shop_info set shop_code = #{shop_code} where sid =#{sid}
+	</update>
+	<!-- 在新增店铺的同时分配给店铺主登录app的账号 -->
+	<insert id="addShopAndUser" parameterType="pd">
+		insert into zs_bk_shop_assistant (id,shop_id,login_name,password,type,phone,state,createTime)values(null,#{shop_id},#{USERNAME},#{PASSWORD},1,#{PHONE},1,now())
+	</insert>
+	
+	<!-- 查询店铺的意见反馈列表 -->
+	<select id="getShopUseropinionlistPage" parameterType="pd" resultType="pd">
+		SELECT a.id,b.shop_name,a.content,a.datetime,a.type FROM zs_bk_shop_feedback as a
+        LEFT JOIN zs_bk_shop_info AS b ON a.shop_id=b.sid
+        ORDER BY a.datetime DESC
+	</select>
+	<!-- 删除用户意见反馈 -->
+	<delete id="delShopoption" parameterType="pd">
+		DELETE FROM zs_bk_shop_feedback WHERE id=#{id}
+	</delete>
+</mapper>

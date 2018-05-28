@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="prizeMapper">
+
+    <!-- 查询奖励列表 -->
+	<select id="findPrizelistPage" parameterType="pd" resultType="pd" useCache="false">
+		select a.pgid,a.prizeg_gift_name,a.prizeg_gift_probability,a.prizeg_gift_num,
+		    a.prizeg_createdate,a.prizeg_remark,level
+		from zs_bk_prizegift_info a 
+		order by a.prizeg_createdate desc 
+	</select>
+
+    <!-- 新增奖励 -->
+    <insert id="addPrize" parameterType="pd">
+        insert into zs_bk_prizegift_info(
+            prizeg_gift_name,prizeg_gift_probability,prizeg_gift_num,
+            prizeg_createdate,prizeg_remark,level
+        )
+        values(
+            #{prizeg_gift_name},#{prizeg_gift_probability},#{prizeg_gift_num},
+            #{prizeg_createdate},#{prizeg_remark},#{level}
+        )     
+    </insert>
+
+	<!-- 更新奖励 -->	
+    <update id="updatePrize" parameterType="pd">
+        update zs_bk_prizegift_info set prizeg_gift_name=#{prizeg_gift_name},
+           prizeg_gift_probability=#{prizeg_gift_probability},prizeg_gift_num=#{prizeg_gift_num},
+           prizeg_remark=#{prizeg_remark},level=#{level}
+        where pgid=#{pgid}
+    </update>
+    
+    <!-- 根据ID查询奖励详情 -->
+    <select id="findPrizeByID" parameterType="pd" resultType="pd" useCache="false">
+		select a.pgid,a.prizeg_gift_name,a.prizeg_gift_probability,a.prizeg_gift_num,
+		    a.prizeg_createdate,a.prizeg_remark,level
+		from zs_bk_prizegift_info a 
+		where a.pgid=#{pgid}
+	</select>
+    
+    <!-- *********************************奖金池******************************************** -->
+    
+     <!-- 查询奖金池列表 -->
+	<select id="findPrizePoollistPage" parameterType="pd" resultType="pd" useCache="false">
+		select a.bpid,a.bp_money,a.bp_min_money,a.bp_distributable,
+		    a.bp_distributable_min,a.bp_allocated,a.bp_distributable_men,
+		    a.bp_increasing_rate,a.bp_createdate,a.bp_remark
+		from zs_bk_prizepool_info a 
+		order by a.bp_createdate desc 
+	</select>
+
+    <!-- 新增奖金池 -->
+    <insert id="addPrizePool" parameterType="pd">
+        insert into zs_bk_prizepool_info(
+            bp_money,bp_min_money,bp_distributable,bp_distributable_min,
+            bp_allocated,bp_distributable_men,bp_increasing_rate,
+            bp_createdate,bp_remark
+        )
+        values(
+            #{bp_money},#{bp_min_money},#{bp_distributable},#{bp_distributable_min},
+            #{bp_allocated},#{bp_distributable_men},#{bp_increasing_rate},
+            #{bp_createdate},#{bp_remark}
+        )     
+    </insert>
+
+	<!-- 更新奖金池 -->	
+    <update id="updatePrizePool" parameterType="pd">
+        update zs_bk_prizepool_info set bp_min_money=#{bp_min_money},
+           bp_distributable_min=#{bp_distributable_min},bp_distributable_men=#{bp_distributable_men},
+           bp_increasing_rate=#{bp_increasing_rate},bp_remark=#{bp_remark}
+        where bpid=#{bpid}
+    </update>
+    
+    <!-- 根据ID查询奖金池详情 -->
+    <select id="findPrizePoolByID" parameterType="pd" resultType="pd" useCache="false">
+		select a.bpid,a.bp_money,a.bp_min_money,a.bp_distributable,
+		    a.bp_distributable_min,a.bp_allocated,a.bp_distributable_men,
+		    a.bp_increasing_rate,a.bp_createdate,a.bp_remark
+		from zs_bk_prizepool_info a  
+		where a.bpid=#{bpid}
+	</select>
+    
+</mapper>

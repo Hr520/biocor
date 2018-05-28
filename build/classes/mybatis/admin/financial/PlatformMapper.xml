@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="platformMapper">
+<!-- 山莓平台 财务管理模块 大类 -->
+
+
+    <!-- 平台端 -->
+    <!-- 获取平台账目 -->
+    <select id="findPlatformFinancial" parameterType="pd" resultType="pd"
+		useCache="false" statementType="CALLABLE">
+		{call bill_statistics()}
+	</select>
+
+    <!-- 查询所有的店铺列表 -->
+    <select id="findAllShopList" parameterType="pd" resultType="pd">
+		select sid,shop_name
+		from zs_bk_shop_info
+		where 1=1
+	</select>
+
+    
+    <!-- 统计平台(店铺)订单详情 -->
+    <select id="findPlatformOrderInfo" parameterType="pd" resultType="pd">
+		SELECT COUNT(1) AS all_order,
+SUM(IF(a.order_pay_state=1,1,0) ) AS pay_order,
+SUM(IF(a.order_pay_state=1,a.order_money,0)) AS pay_money,
+SUM(IF(a.order_state=2,1,0) ) AS commit_order,
+SUM(IF(a.order_state=1,1,0) ) AS un_commit_order,
+SUM(IF(a.order_state=4,1,0) ) AS return_ing_order,
+SUM(IF(a.order_state=5,1,0) ) AS return_order
+FROM zs_bk_order_info a
+LEFT JOIN zs_bk_shop_info b ON a.order_sid = b.sid
+WHERE a.order_createdate <![CDATA[>=]]> #{start} AND a.order_createdate <![CDATA[<]]> #{end} 
+        <if test="shopid !=null and shopid !=''">
+            AND b.sid = #{shopid}
+        </if>
+	</select>
+
+    
+    <!-- 统计平台(店铺)商品详情 -->
+    <select id="findAllGoodlistPage" parameterType="pd" resultType="pd">
+        select * from (
+		SELECT a.od_goodsId AS gid,a.od_goodsName AS goods_name,sum(a.od_goodsNum) AS num,c.shop_name,
+		    b.goods_moeny,b.goods_dis_money
+FROM zs_bk_order_detail_info a
+LEFT JOIN zs_bk_goods_info b ON a.od_goodsId = b.gid
+LEFT JOIN zs_bk_shop_info c ON b.goods_sid= c.sid
+left join zs_bk_order_info d on a.od_oNO = d.order_no
+WHERE a.od_goodsId != 0 
+     and a.od_createdate <![CDATA[>=]]> #{pd.start} AND a.od_createdate <![CDATA[<]]> #{pd.end} 
+        <if test="pd.shopid !=null and pd.shopid !=''">
+            AND c.sid = #{pd.shopid}
+        </if>
+GROUP BY a.od_goodsId
+UNION 
+SELECT a.gid,a.goods_name,0,b.shop_name,a.goods_moeny,a.goods_dis_money
+FROM zs_bk_goods_info a
+LEFT JOIN zs_bk_shop_info b ON a.goods_sid= b.sid
+WHERE 1=1 
+        <if test="pd.shopid !=null and pd.shopid !=''">
+            AND b.sid = #{pd.shopid}
+        </if>
+and a.gid NOT IN (SELECT od_goodsId AS gid
+FROM zs_bk_order_detail_info
+WHERE od_goodsId != 0
+GROUP BY od_goodsId
+) 
+) as tab
+ORDER BY num DESC
+
+	</select>    
+	
+	
+	<!-- 统计平台奖金发放记录__发放人数 -->
+	<select id="findPlatformPrizelistPage" parameterType="pd" resultType="pd" >
+		SELECT prize_time,prize_lv,prize_jd,prize_allnum,prize_num
+        FROM zs_bk_prizegift_log 
+        WHERE state =1 
+        and prize_time <![CDATA[>=]]> #{pd.start} AND prize_time <![CDATA[<=]]> #{pd.end} 
+        group by prize_time
+	</select>
+	
+</mapper>

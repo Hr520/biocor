@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="recommendShopMapper">
+	<!-- 新增推荐餐厅 -->
+	<insert id="addRecommendShop" parameterType="pd">
+		insert into zs_bk_user_recommendr (urr_userId,urr_restaurant_name,urr_restaurant_tyepId,
+		urr_restaurant_address,urr_restaurant_tel,urr_state,urr_createdate,
+		urr_restaurant_longitude,urr_restaurant_latitude) 
+		values(#{urr_userId},#{urr_restaurant_name},#{urr_restaurant_tyepId},
+		#{urr_restaurant_address},#{urr_restaurant_tel},#{urr_state},now(),
+		#{urr_restaurant_longitude},#{urr_restaurant_latitude})
+	</insert>
+	<!-- 查询商店类型 -->
+	<select id="getShopType" resultType="pd">
+		select stid,st_name from zs_bk_shop_type_info
+	</select>
+	<!-- 查询所有省 -->
+	<select id="getProvince" resultType="pd">
+		select provinceID,province from hat_province
+	</select>
+	<!-- 查询所有市 -->
+	<select id="getCity" resultType="pd">
+		select cityID,city,father from hat_city
+	</select>
+	<!-- 查询商店类型 -->
+	<select id="getArea" resultType="pd">
+		select areaID,area,father from base_provincecityarea
+	</select>
+</mapper>

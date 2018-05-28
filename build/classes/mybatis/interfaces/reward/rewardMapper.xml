@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="rewardMapper">
+	<!-- 查询排队发放的奖励列表 -->
+	<select id="getUnissuedList" parameterType="pd" resultType="pd">
+		select re.urid,re.ur_orderId,re.ur_orderNo,re.ur_shop_name,re.ur_user_consumeday,
+		re.ur_reward_money as order_money,re.ur_shop_images,
+		ra.us_rate,ra.us_state,o.order_sid,
+		u.userid,u.user_code,u.user_img,i.uig_grade_No
+		from zs_bk_user_reward_info re
+		left join zs_bk_user_rate ra on re.ur_orderNo = ra.us_oNO
+		left join zs_bk_order_info o on re.ur_orderNo = o.order_no
+		left join zs_bk_user_info u on re.ur_userId = u.userid
+		left join zs_bk_user_ig_info i on
+		u.user_grade_integral <![CDATA[>=]]>
+		i.uig_grade_begin and u.user_grade_integral <![CDATA[<]]>
+		i.uig_grade_end
+		where ra.us_rate <![CDATA[<]]> 1 and o.order_state !=4 and o.order_state !=5
+		order by ra.us_rate desc
+		limit #{num},#{everypage}
+	</select>
+	<!-- 查询已经发放的奖励列表 -->
+	<select id="getGrantList" parameterType="pd" resultType="pd">
+		select re.urid,re.ur_orderId,re.ur_orderNo,re.ur_shop_name,re.ur_user_consumeday,
+		re.ur_shop_images,
+		ra.us_rate,ra.us_state,o.order_sid,o.order_money,
+		u.userid,u.user_code,u.user_img,i.uig_grade_No
+		from zs_bk_user_reward_info re
+		left join zs_bk_user_rate ra on re.ur_orderNo = ra.us_oNO
+		left join zs_bk_order_info o on re.ur_orderNo = o.order_no
+		left join zs_bk_user_info u on re.ur_userId = u.userid
+		left join zs_bk_user_ig_info i on
+		u.user_grade_integral <![CDATA[>=]]>
+		i.uig_grade_begin and u.user_grade_integral <![CDATA[<]]>
+		i.uig_grade_end
+		where ra.us_rate = 1 and o.order_state !=4 and o.order_state !=5
+		order by ra.us_rate desc
+		limit #{num},#{everypage}
+	</select>
+	<!-- 根据订单号查询用户对该奖励使用的加速卡 -->
+	<select id="getUsedSpeedCard" parameterType="pd" resultType="pd">
+		select s.sc_speedc_name,s.sc_speedc_integral,s.sc_speedc_rate
+		from zs_bk_user_speedc_info usc 
+		left join zs_bk_speed_card s on usc.usc_scid = s.scid
+		where usc.usc_orderNo = #{ur_orderNo}
+		order by s.sc_speedc_rate asc
+	</select>
+</mapper>

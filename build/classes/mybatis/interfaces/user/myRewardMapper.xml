@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="myRewardMapper">
+	<!-- 查询我的奖励列表 -->
+	<select id="myRewardList" parameterType="pd" resultType="pd">
+		select re.urid,re.ur_orderId,re.ur_orderNo,re.ur_shop_name,re.ur_user_consumeday,re.ur_reward_money,
+		ra.us_rate,ra.us_state,o.order_money,o.order_state
+		from zs_bk_user_reward_info re
+		left join zs_bk_user_rate ra on re.ur_orderNo = ra.us_oNO
+		left join zs_bk_order_info o on re.ur_orderNo = o.order_no
+		where re.ur_userId = #{userid} and o.order_state !=4 and o.order_state !=5
+		order by re.ur_reward_createdate desc
+		limit #{num},#{everypage}
+	</select>
+	<!-- 根据订单号查询增长率和奖励金额和用户id -->
+	<select id="getRateAndMoney" parameterType="pd" resultType="pd">
+		select re.ur_userId,re.ur_reward_money,ra.us_rate,re.ur_orderNo,ra.us_state,u.user_code
+		from zs_bk_user_reward_info re
+		left join zs_bk_user_rate ra on re.ur_orderNo = ra.us_oNO
+		left join zs_bk_user_info u on re.ur_userId = u.userid
+		where ur_orderNo = #{ur_orderNo}
+	</select>
+	<!-- 去给用户余额中加入奖励的钱 -->
+	<update id="addRewardMoney" parameterType="pd">
+		update zs_bk_user_info set user_money = #{user_money} where userid = #{userid}
+	</update>
+	<!-- 修改奖励表中的状态 -->
+	<update id="updateExchangeState" parameterType="pd">
+		update zs_bk_user_rate set us_state = #{us_state},us_date = now() where us_oNO = #{ur_orderNo}
+	</update>
+	<!-- 修改用户奖励进度 -->
+	<update id="updateRewardRate" parameterType="pd">
+		update zs_bk_user_rate set us_rate = #{us_rate},us_state=#{us_state} where us_oNO = #{ur_orderNo}
+	</update>
+	<!-- 修改加速卡使用状态 -->
+	<update id="updateSpeedCardState" parameterType="pd">
+		update zs_bk_user_speedc_info set usc_state = 1,usc_update = now(),usc_orderNo = #{ur_orderNo} 
+		where uscid = #{uscid}
+	</update>
+	<!-- 查询奖金池中的总金额，最少金额，可分配金额，已分配金额，最小支配金额 -->
+	<select id="getPoolInfo" resultType="pd">
+		select bpid,bp_money,bp_min_money,bp_distributable,bp_distributable_min,bp_allocated
+		from zs_bk_prizepool_info limit 1
+	</select>
+	<!-- 修改奖金池中的数据 -->
+	<update id="updatePoolInfo" parameterType="pd">
+		update zs_bk_prizepool_info set bp_money = #{bp_money},
+		bp_allocated = #{bp_allocated},bp_distributable = #{bp_distributable}
+		where bpid = #{bpid}
+	</update>
+	<!-- 查询该奖励使用的加速卡数量 -->
+	<select id="getUserCount" parameterType="pd" resultType="java.lang.Integer">
+		select count(uscid)
+		from zs_bk_user_speedc_info where usc_orderNo = #{ur_orderNo}
+	</select>
+	<!-- 查询加速卡的使用状态 -->
+	<select id="getSpeedCardUseState" parameterType="java.lang.String" resultType="pd">
+		select a.usc_state,b.sc_speedc_rate
+		from zs_bk_user_speedc_info a
+		left join zs_bk_speed_card b on a.usc_scid = b.scid
+		where a.uscid = #{uscid}
+	</select>
+</mapper>

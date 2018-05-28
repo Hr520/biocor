@@ -1,0 +1,107 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>美食资讯</title>
+    <link rel="stylesheet" type="text/css" href="css/swiper.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/swiper.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script type="text/javascript">
+	    $(function(){
+	    	$("#curpage").val("1");
+	    	getFoodInfoList();
+		});
+	    function getFoodInfoList(){
+	    	var discoveryf_type = $("#discoveryf_type").val();
+	    	var curpage = $("#curpage").val();
+    		$.ajax({
+    			type : "POST",
+    			url : "/interface/find/getFoodInfoList",
+    			data : {discoveryf_type:discoveryf_type,curpage:curpage},
+    			dataType :　"json",
+    			success : function(data){
+    				var contentHtml = "";
+    				$.each(data.list,function(index,content){
+    					var cont = content['discoveryf_content'];
+    					cont=cont.replace(/<\/?.+?>/g,"");
+    					contentHtml+= "<a href='foodNewsDetailsH5.html?dfid="
+    					           +content['dfid']
+    							   +"'><div class='sub-content clearfix'>"
+    					           +"<div class='wrap '><div class='li-left'><img src='"
+    					           +"/"+content['discoveryf_image']
+    					           +"' class='all-img'></div><div class='li-right'><h3>"
+    					           +content['discoveryf_title']
+    					           +"</h3><div class='li-des'>"
+                                   +cont
+                                   +"</div></div></div></div></a>";
+    				});
+    				$("#content"+discoveryf_type).append(contentHtml);
+    			}
+    		});
+	    }
+    </script>
+</head>
+<body style="background:#f5f5f5;">
+	<input type="hidden" id="discoveryf_type" value="1">
+	<input type="hidden" id="curpage" value="1">
+    <div class="wrapper">
+        <div class="main">
+            <div class="list-box">
+                <ul class="nav-ul">
+                    <li lq ="content1"><a href="javascript:;" class="act">美食头条</a></li>
+                    <li lq="content2"><a href="javascript:;">营养饮食</a></li>
+                    <li lq="content3"><a href="javascript:;">吃货趣事</a></li>
+                </ul>
+            </div>
+            <div class="sub-main">
+                <section  id="content1" class="sub-section" style="display:block;">
+                   
+                </section>
+               <section id="content2" class="sub-section">
+                   
+               </section>
+               <section id="content3" class="sub-section">
+                   
+               </section>
+            </div>
+               <div class="sub-content clearfix" style="text-align: center;">
+                            <a href="javascript:void;" onclick="more()">加载更多</a>
+                    </div>
+        </div>
+    </div>
+    <script>
+        $(function(){
+            $(".nav-ul li").click(function(){
+                var id = $(this).attr("lq");
+                if(id=="content1"){
+                	$("#discoveryf_type").val("1");
+        	    	$("#curpage").val("1");
+        	    	$("#content1").html("");
+                }else if(id=="content2"){
+                	$("#discoveryf_type").val("2");
+        	    	$("#curpage").val("1");
+        	    	$("#content2").html("");
+                }else if(id=="content3") {
+                	$("#discoveryf_type").val("3");
+        	    	$("#curpage").val("1");
+        	    	$("#content3").html("");
+				}
+                getFoodInfoList();
+                $(".nav-ul li a.act").removeClass("act");
+                $(this).find("a").addClass("act");
+
+                $("#"+id).show().siblings().hide();
+            });
+        });
+        function more(){
+        	var curpage = parseInt($("#curpage").val());
+        	curpage = curpage + 1;
+        	$("#curpage").val(curpage);
+        	getFoodInfoList();
+        }
+    </script>
+</body>
+</html>

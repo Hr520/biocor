@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bannerMapper">
+   <!-- 
+   	private Integer mid;
+	private String m_topImg;
+	private String m_bgImg;
+	private String m_type;
+	private String m_No;
+	private String m_createDate;
+	private String m_title;
+    -->
+   	<resultMap type="com.biocor.entity.bannerM.BannerM" id="BannermMap">
+   		 <id column="mid" property="mid"/>
+		 <result column="m_topImg" property="m_topImg"/>
+		 <result column="m_bgImg" property="m_bgImg"/>
+		 <result column="m_type" property="m_type"/>
+		 <result column="m_No" property="m_No"/>
+		 <result column="m_createDate" property="m_createDate"/>
+		 <result column="m_title" property="m_title"/>
+		 <result column="m_remark" property="m_remark"/>
+		 <result column="m_order" property="m_order"/>
+    </resultMap>
+    
+    <resultMap id="BannermdMap"  type="com.biocor.entity.bannerM.BannerMD">
+		 	 <result column="shop_name" property="shop_name"/>
+			 <result column="shop_adders" property="shop_adders"/>
+			 <result column="shop_street" property="shop_street"/>
+			 <result column="shop_grade" property="shop_grade"/>
+			 <result column="st_name" property="st_name"/>
+			 <result column="shop_consume" property="shop_consume"/>
+			 <result column="shop_introduce" property="shop_introduce"/>
+			 <result column="shop_images" property="shop_images"/>
+			 <result column="goods_images" property="goods_images"/>
+			 <result column="goods_name" property="goods_name"/>
+			 <result column="goods_dis_money" property="goods_dis_money"/>
+			 <result column="goods_moeny" property="goods_moeny"/>
+			 <result column="gid" property="gid"/>
+  </resultMap>
+  
+  <!-- 
+  private String goods_name;  //菜名称
+	private String goods_moeny; //菜金额
+	private String goods_dis_money; //折扣价
+	private String goods_images; //折扣价
+   -->
+	<resultMap type="com.biocor.entity.bannerM.BannerMDG" id="BannermdgMap">
+		<result column="goods_name" property="goods_name" />
+		<result column="goods_moeny" property="goods_moeny" />
+		<result column="goods_dis_money" property="goods_dis_money" />
+		<result column="goods_images" property="goods_images" />
+	</resultMap>
+
+    <!-- 查询广告列表 -->
+	<select id="findBannerlistPage" parameterType="pd" resultType="pd" useCache="false">
+		select a.baid,a.banner_image,a.banner_type,a.banner_detail,
+		    a.banner_url,a.banner_createdate,a.banner_remark,
+		    a.banner_order,a.banner_search,a.search_type,a.banner_content_img,
+		    a.model_id
+		from zs_bk_banner_info a
+		where 1=1 
+		order by a.banner_createdate desc
+	</select>
+
+    <!-- 添加banner-->
+	<insert id="addBanner" parameterType="pd">
+	    insert into zs_bk_banner_info(
+	        banner_image,banner_type,banner_detail,banner_url,
+	        banner_createdate,banner_remark,
+	        banner_order,banner_search,search_type,banner_content_img,
+	        model_id
+	        )
+	    values(
+	        #{banner_image},#{banner_type},#{banner_detail},#{banner_url},
+	        #{banner_createdate},#{banner_remark},
+	        #{banner_order},#{banner_search},#{search_type},#{banner_content_img},
+	        #{model_id}
+	        )
+	</insert>
+		
+    <!-- 删除广告 -->
+	<delete id="delBanner" parameterType="pd">
+	    delete from zs_bk_banner_info where baid=#{bannnerid}
+	</delete>	
+	
+	
+	<!-- 保存模板主表 -->
+	<insert id="savem" parameterType="pd">
+		insert into zs_bk_modelview (m_topImg,m_bgImg,m_type,m_No,m_createDate,m_title,m_remark)
+		          values(#{m_topImg},#{m_bgImg},#{m_type},#{m_No},#{m_createDate},#{m_title},#{m_remark})
+	</insert>
+	
+	<!-- 修改主表 -->
+	
+	<update id="updatem" parameterType="pd">
+		update  zs_bk_modelview set 
+		mid=#{mid} 
+		<if test="m_topImg !=null and  m_topImg !=''">
+			,m_topImg=#{m_topImg}
+		</if>
+		<if test="m_bgImg !=null and  m_bgImg !=''">
+			,m_bgImg=#{m_bgImg}
+		</if>
+		<if test="m_type !=null and  m_type !=''">
+			,m_type=#{m_type}
+		</if>
+		<if test="m_title !=null and  m_title !=''">
+			,m_title=#{m_title}
+		</if>
+		<if test="m_order !=null and  m_order !=''">
+			,m_order =#{m_order}
+		</if>
+		<if test="m_remark !=null and  m_remark !=''">
+			,m_remark =#{m_remark}
+		</if>
+		where mid=#{mid}
+	</update>
+	
+	<!-- 保存模板明细表 -->
+	<insert id="savemd" parameterType="pd">
+		insert into zs_bk_modelview_detail (md_mNO,md_param)
+		          values(#{md_mNO},#{md_param})
+	</insert>
+	
+	<!--根据m_no 删除明细表 -->
+	<delete id="delmd" parameterType="pd">
+		 delete from  zs_bk_modelview_detail where md_mNO=#{m_No}
+	</delete>
+	
+	
+	<!-- banner模板商铺查询 -->
+	<select id="findBannerm" resultMap="BannermMap"  parameterType="pd">
+	     SELECT x.mid,x.m_bgImg,x.m_order,x.m_createDate,x.m_remark,x.m_No,x.m_title,x.m_topImg,x.m_type from zs_bk_modelview x
+	     where 1=1 
+	     <if test="mid !=null and mid !=''">
+	     	and x.mid=#{mid}
+	     </if>
+	      order by m_order 
+	</select>
+	
+	<!-- banner模板商铺查询 -->
+    <select id="findBannermds" parameterType="String" resultMap="BannermdMap">
+    select y.sid,y.shop_adders,g.goods_name,g.goods_moeny, g.goods_dis_money,y.shop_consume,y.shop_grade, y.shop_introduce, SUBSTRING(y.shop_images,1, IF( LOCATE(',',y.shop_images)-1=-1,CHAR_LENGTH(y.shop_images),LOCATE(',',y.shop_images)-1 ) ) shop_images, y.shop_name,y.shop_street, z.st_name 
+		from zs_bk_modelview_detail x LEFT JOIN zs_bk_shop_info y on(x.md_param=y.sid) 
+		LEFT JOIN zs_bk_shop_type_info z on (y.shop_type=z.stid) 
+		LEFT JOIN zs_bk_goods_info g on(y.sid=g.goods_sid)
+			 where  x.md_mNO=#{m_no} 
+    </select>
+	
+	<!-- findBannermdsOrder模板商铺查询 -->
+    <select id="findBannermdsOrder" parameterType="String" resultMap="BannermdMap">
+    select y.sid,y.shop_consume,y.shop_grade,y.shop_introduce, 
+	SUBSTRING(y.shop_images,1, IF( LOCATE(',',y.shop_images)-1=-1,CHAR_LENGTH(y.shop_images),LOCATE(',',y.shop_images)-1 ) ) shop_images, y.shop_name,y.shop_street, z.st_name 
+	   from zs_bk_modelview_detail x LEFT JOIN zs_bk_shop_info y on(x.md_param=y.sid)
+	LEFT JOIN zs_bk_shop_type_info z on (y.shop_type=z.stid)
+			 where  x.md_mNO=#{m_no} 
+    </select>
+    
+    <!-- findBannermdg -->
+    <select id="findBannermdg" parameterType="int" resultMap="BannermdgMap">
+    	SELECT x.goods_name, x.gid,x.goods_dis_money, SUBSTRING(x.goods_images,1, IF( LOCATE(',',x.goods_images)-1=-1,CHAR_LENGTH(x.goods_images),LOCATE(',',x.goods_images)-1 ) )goods_images
+		 ,x.goods_moeny from  zs_bk_goods_info x where x.goods_sid=#{sid}  LIMIT 0,10
+    </select>
+    
+    <!-- findBannermdgS -->
+    
+    <select id="findBannermdgS" parameterType="String" resultMap="BannermdMap">
+    select y.gid,z.sid,z.shop_street,y.goods_images,y.goods_dis_money,y.goods_moeny,y.goods_name,z.shop_name
+			from 
+			zs_bk_modelview_detail x LEFT JOIN  
+			zs_bk_goods_info y on (x.md_param=y.gid)
+			LEFT JOIN zs_bk_shop_info z  on (y.goods_sid=z.sid)
+		 where  x.md_mNO=#{m_no} 
+    	
+    </select>
+
+    <!-- 获取模板列表 -->
+    <select id="findAllModel" parameterType="pd" resultType="pd" useCache="false">
+        SELECT a.mid,a.m_order FROM zs_bk_modelview a
+    </select>
+    
+    <!-- findGoodBygid -->
+    <select id="findGoodBygid" resultType="pd" parameterType="pd">
+	    select  y.gid,y.goods_dis_money dismoney,y.goods_moeny,y.goods_name,y.goods_sid,z.shop_name,z.shop_adders,r.st_name,y.goods_images,z.shop_street
+			from  zs_bk_goods_info y  
+			LEFT JOIN 
+			zs_bk_shop_info z on (y.goods_sid=z.sid)
+			LEFT JOIN 
+			zs_bk_shop_type_info  r  on (z.shop_type=r.stid)
+			where y.gid=#{gid}
+    </select>
+</mapper>

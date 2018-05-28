@@ -1,0 +1,128 @@
+*{
+    margin:0;
+    padding:0;
+}
+body{
+    font-size:14px;
+    font-family: "微软雅黑" ,"Helvetica Neue", Helvetica, "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+    color:#333;
+}
+a{
+    text-decoration: none;
+    color:#333;
+}
+a img{
+    border:none;
+}
+ul,li{
+    list-style-type: none;
+}
+img{display: block;font-size: 0}
+em{
+    font-style:normal;
+}
+/*input::-ms-input-placeholder{text-align: center;}
+input::-webkit-input-placeholder{text-align: center;}*/
+input[type="button"], input[type="submit"], input[type="reset"] {
+    -webkit-appearance: none;
+}
+textarea {  -webkit-appearance: none;}
+
+.clearfix:after{
+    display:block;
+    clear:both;
+    content:"";
+    visibility:hidden;
+    height:0
+}
+.clearfix{
+    zoom:1
+}
+.fl{
+    float:left;
+}
+.fr{
+    float:right !important;
+}
+.fn{
+    float:none;
+}
+.tl{
+    text-align: left !important;
+}
+.tc{
+    text-align: center;
+}
+.rel{
+    position:relative;
+}
+.all-img{
+    width:100%;
+}
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+/*-------------------------------*/
+.wrap{
+    margin:0 20px;
+}
+.main{
+    padding-bottom:56px;
+}
+.sj-title{
+    font-size:16px;
+    text-align: center;
+    padding:5px 0;
+}
+.sj-ul li{
+    line-height:1.8;
+    text-indent: 28px;
+    padding:5px 0;
+}
+.pd10{
+    padding:15px 0 10px;
+
+}
+.input-box{
+    width:100%;
+    height:40px;
+    line-height:40px;
+    border-radius: 4px;
+    margin-bottom:10px;
+    background:#fff;
+    box-shadow: 1px 2px 2px #E8DCB4 ;
+}
+.input-text{
+    width:100%;
+    padding:8px 0;
+    box-sizing: border-box;
+    border:none;
+    text-indent: 10px;
+    font-size:14px;
+}
+.btn{
+    width:100%;
+    height:40px;
+    line-height:40px;
+    background:#F54438;
+    border:none;
+    border-radius: 4px;
+    color:#fff;
+    font-size:14px;
+    box-shadow: 1px  2px 2px #CE2F24;
+    margin:20px 0 25px;
+}
+.share-btn{
+    width:100%;
+    height:55px;
+    line-height:55px;
+    color:#F54438;
+    position:fixed;
+    bottom:0;
+    background:rgba(240,240,240,0.96);
+    text-align: center;
+    font-size:16px;
+    border-top:1px solid #dbdbdb;
+    font-weight: 600;
+
+}

@@ -1,0 +1,110 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>健康测试</title>
+    <link rel="stylesheet" type="text/css" href="css/swiper.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/swiper.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/icheck.min.js"></script>
+</head>
+<body>
+<div class="wrapper">
+    <div class="main ">
+        <div class="wrap">
+            <form action="" >
+                <section>
+                    <div class="question"><em>1/7</em>夏天你的饮食主要类型？</div>
+                    <div class="checkbox">
+                        <ul class="cs-ul">
+                            <label for="ch1">
+                                <li>
+                                    <input type="radio" id="ch1" name="ck1" value="1" data-required="true">
+                                    <span>1、烧烤烤肉</span>
+                                </li>
+                            </label>
+                            <label for="ch2">
+                                <li>
+                                    <input type="radio" id="ch2" name="ck1" value="2" data-required="true">
+                                    <span>2、日韩料理</span>
+                                </li>
+                            </label>
+                            <label for="ch3">
+                                <li>
+                                    <input type="radio" id="ch3" name="ck1" value="3" data-required="true">
+                                    <span>3、中餐</span>
+                                </li>
+                            </label>
+                            <label for="ch4">
+                                <li>
+                                    <input type="radio" id="ch4" name="ck1" value="4" data-required="true">
+                                    <span>4、西餐</span>
+                                </li>
+                            </label>
+                            <label for="ch5">
+                                <li>
+                                    <input type="radio" id="ch5" name="ck1" value="5" data-required="true">
+                                    <span>5、火锅</span>
+                                </li>
+                            </label>
+                            <label for="ch6">
+                                <li>
+                                    <input type="radio" id="ch6" name="ck1" value="6" data-required="true">
+                                    <span>6、自助餐</span>
+                                </li>
+                            </label>
+                        </ul>
+                    </div>
+                </section>
+                <div class="btn-div">
+                    <ul>
+                        <li class="hide"><a href="#">上一题</a></li>
+                        <li><a href="#"> 下一题 </a></li>
+                    </ul>
+
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<script>
+    $(function(){
+        var init = function(){
+            var val = $('input:radio:checked').val();
+            if(val){
+                $(".btn-div ul li:nth-child(2)").css("opacity","1");
+            }
+        };
+        init();
+
+        $("input").click(function() {
+            $(".btn-div ul li:nth-child(2)").css("opacity","1");
+            $(".btn-div ul li").click(function(){
+                var val = $('input[type="radio"]:checked').val();
+                var result = sessionStorage.result;
+                if(result){
+                    result = $.parseJSON( result );
+                }else{
+                    result = {};
+                }
+                result[1] = val;
+                sessionStorage.result = JSON.stringify(result);
+                window.location.href="food-test1.html";
+            })
+        });
+
+    });
+    $('input').iCheck({
+        checkboxClass: 'icheckbox_minimal',
+        radioClass: 'iradio_minimal',
+        increaseArea: '20%' // optional
+    });
+    $('.label_radio:eq(0) input').on('ifChecked', function(event) {
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="withdrawMapper">
+
+    <!-- 查询提现申请列表 -->
+	<select id="findWithDrawlistPage" parameterType="pd" resultType="pd" useCache="false">
+		SELECT a.uwid,a.uw_userId,a.uw_createdate,a.uw_type,
+		    a.uw_remark,a.uw_money,a.uw_orderNO,a.uw_state,
+		    b.user_name,
+		    c.uw_type as cuw_type,c.uw_money as cuw_money,
+		    d.ua_user_account
+		FROM zs_bk_user_withdraw_info a 
+		LEFT JOIN zs_bk_user_info b ON a.uw_userId = b.userid 
+		LEFT JOIN zs_bk_user_withdraw_info c ON a.uw_orderNO = c.uw_orderNO
+		left join zs_bk_user_account_info d on a.uw_userId = d.ua_userId
+		WHERE 1=1 AND a.uw_type=1 AND c.uw_type = 0
+		<if test="pd.type !='' and pd.type != null">
+            and a.uw_state = #{pd.type}
+        </if>
+        ORDER BY a.uw_createdate DESC
+	</select>
+
+	
+	<!-- 更新提现申请状态 -->
+	<update id="updateWithDraw" parameterType="pd">
+	    update zs_bk_user_withdraw_info set uw_state = #{state}, 
+	        uw_remark = #{remark}
+	    where uw_orderNO=#{orderNo}
+	</update>	
+
+    <!-- ********************************************** -->
+    <!-- 商户提现申请列表 -->
+    <select id="findWithDrawShoplistPage" parameterType="pd" resultType="pd" useCache="false">
+        select a.id,a.shop_id,a.money,a.getmoney_time,a.state,a.agreen_time,a.remark,
+            b.shop_name,
+            c.USERNAME,c.NAME
+        from zs_bk_shop_applymoney a
+        left join zs_bk_shop_info b on a.shop_id = b.sid
+        left join sys_user c on b.user_id = c.USER_ID
+        where 1=1
+        <if test="pd.type !='' and pd.type != null">
+            and a.state = #{pd.type}
+        </if>
+        order by a.getmoney_time desc
+    </select>
+  
+    <!-- 更新商户提现申请状态 -->
+	<update id="updateWithDrawShop" parameterType="pd">
+	    update zs_bk_shop_applymoney set state = #{state}, 
+	        remark = #{remark},agreen_time = now() 
+	    where id=#{id}
+	</update>	
+    
+</mapper>

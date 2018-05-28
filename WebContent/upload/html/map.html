@@ -1,0 +1,71 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=C24689711990197c2be01db567626197&s=1"></script>
+    <title>地图</title>
+    <style type="text/css">
+        body, html,iframe{width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";border:none;}
+
+    </style>
+    <script src="js/jquery.min.js"></script>
+    <script TYPE="text/javascript">
+    $(function() {
+		var url = GetRequest();
+		var id = url.sid;
+		$.ajax({
+			type : "POST",
+			url : '/interface/shoporder/getshopInfoH5?uf_sid='+ id,
+			dataType : 'json',
+			cache : false,
+			success : function(data) {
+				if ("0" == data.state) {
+					 var url = "http://m.amap.com/navi/?start=&dest="+data.data.shop_longitude+","+data.data.shop_latitude
+		    		   +"&destName="+data.data.shop_name+"&key=d3f5d8b3b05231fa6a11375492310e3a";
+		    //alert(url)用&号分割，一：是店铺地址，二：纬度，三：经度
+					 var u = navigator.userAgent;
+						var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+						var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+						if(isAndroid){
+							url="http://m.amap.com/navi/?dest="+data.data.shop_longitude+","+data.data.shop_latitude
+				    		   +"&destName="+data.data.shop_name+"&key=d3f5d8b3b05231fa6a11375492310e3a";
+							alert(data.data.shop_adders+"&"+data.data.shop_latitude+"&"+data.data.shop_longitude+"&"+url);
+						}else if(isiOS){
+							 $("#iframe").attr("src",encodeURI(url)); 
+						}else{
+							  $("#iframe").attr("src",encodeURI("http://m.amap.com/navigation/index/saddr=&daddr=114.36884993674299,30.51374728263799,test2&src=litemap&utm_source=litemap")); 
+								location.href="http://m.amap.com/navigation/index/saddr=&daddr=114.36884993674299,30.51374728263799,test2&src=litemap&utm_source=litemap"; 
+						}
+				    
+				}
+			}
+		});
+		$("#iframe .route-content").click(function (){
+		});
+		$("#iframe .navi-icon").click(function (){
+		});
+    });
+    function GetRequest() {
+		var url = location.search; //获取url中"?"符后的字串 
+		var theRequest = new Object();
+		if (url.indexOf("?") != -1) {
+			var str = url.substr(1);
+			strs = str.split("&");
+			for (var i = 0; i < strs.length; i++) {
+				theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+			}
+		}
+		return theRequest;
+	}
+    </script>
+</head>
+<body>
+    <!--  
+    <iframe src="http://map.baidu.com/mobile/webapp/search/search/qt=s&wd=%E6%81%8B%E5%B0%9A%E9%94%85%E6%97%B6%E5%B0%9A%E8%87%AA%E5%8A%A9%E7%81%AB%E9%94%85(%E5%85%89%E8%B0%B7%E5%A4%A9%E5%9C%B0%E5%BA%97)&c=218&searchFlag=bigBox&version=5&exptype=dep&src_from=webapp_all_bigbox&wd2=%E6%AD%A6%E6%B1%89%E5%B8%82%E6%B4%AA%E5%B1%B1%E5%8C%BA&sug_forward=4cf8d24ea0e84ffd9df779f4&src=1&nb_x=12737027.07&nb_y=3544627.39&center_rank=1/vt=map"></iframe>
+    <iframe src="http://api.map.baidu.com/marker?location=30.48233,114.417405&title=恋尚时尚火锅&content=恋尚时尚火锅&output=html&src=http://taoyouth.blog.51cto.com/2793776/yourComponyName|yourAppName"></iframe>
+    -->
+    <iframe src="" id="iframe"></iframe>
+    
+</body>
+</html>
+

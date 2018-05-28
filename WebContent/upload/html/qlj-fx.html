@@ -1,0 +1,79 @@
+<!Doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>领奖分享</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script src="js/jquery.min.js"></script>
+    <script type="text/javascript">
+  	$(function(){
+  		var ur_reward_money = getUrlParam("reward_money");//奖励金额
+  		var user_code = getUrlParam("user_code");//账号
+  		var ur_orderNo = getUrlParam("ur_orderNo");//交易单号
+  		var createtime = getUrlParam("createtime");//创建时间
+
+  		ur_orderNo = ur_orderNo.substring(0,6)+"***"+ur_orderNo.substring(ur_orderNo.length-6,ur_orderNo.length);
+  		
+  		$("#ur_reward_money").text(ur_reward_money);
+  		$("#user_code").text(user_code);
+  		$("#ur_orderNo").text(ur_orderNo);
+  		$("#ur_reward_money1").text(ur_reward_money);
+  		$("#ur_reward_money2").text(ur_reward_money);
+  		$("#createtime").text(createtime);
+  	});
+  	
+  	function down(){
+  	//跳转应用宝
+		location.href="http://a.app.qq.com/o/simple.jsp?pkgname=com.zoesap.baike";
+  	}
+  	/**
+	截取url中的参数
+	*/
+	function getUrlParam(name)
+	{
+		var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+		var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+		if (r!=null) return unescape(r[2]); return null; //返回参数值
+	}
+    </script>
+</head>
+<body style="background:#fff1d7;">
+<div class="wrapper">
+    <img src="images/zj-head.png" class="all-img">
+    <div class="wrap">
+        <div class="jl-title">Hey!我在“山莓”成功领取了<span id="ur_reward_money2"></span>元现金奖励</div>
+    </div>
+    <section class="data-box">
+        <div class="wrap">
+            <ul class="box-ul clearfix">
+                <li class="li rel"><img src="images/tx-box111.png" class="all-img rel">
+                    <div>“山莓”奖励提现</div>
+                    <ul class="mini-data">
+                        <li>提现金额<span id="ur_reward_money"></span></li>
+                        <li>提现账号<span id="user_code"></span></li>
+                        <li>交易订单<span id="ur_orderNo"></span></li>
+                    </ul>
+                </li>
+                <li class="li rel">
+                    <img src="images/tx-box22.png" class="all-img">
+                    <div class="mini-data2">+ <span id="ur_reward_money1"></span></div>
+                    <div class="mini-times"><span id="createtime"></span></div>
+                </li>
+                <div  class="mini-div">支付宝到账详情</div>
+
+            </ul>
+        </div>
+
+    </section>
+    <img src="images/qlj-img.png" class="all-img mb60">
+</div>
+<footer class="footer" style="background:#f5f5f5;">
+    <div class="jl-btn">
+        <a href="#" class="r-btn block" onclick="down()">下载山莓APP</a>
+    </div>
+
+</footer>
+</body>
+</html>
